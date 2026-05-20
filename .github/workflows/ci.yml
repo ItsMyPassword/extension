@@ -51,3 +51,50 @@ jobs:
           name: coverage
           path: coverage/
           retention-days: 14
+
+  build:
+    name: Build installable extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: verify
+
+    strategy:
+      matrix:
+        target: [chrome, firefox]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (${{ matrix.target }})
+        run: |
+          if [ "${{ matrix.target }}" = "firefox" ]; then
+            npm run build:firefox
+          else
+            npm run build
+          fi
+
+      - name: Package zip (${{ matrix.target }})
+        run: |
+          if [ "${{ matrix.target }}" = "firefox" ]; then
+            npm run zip:firefox
+          else
+            npm run zip
+          fi
+
+      - name: Upload extension artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: itsmypassword-${{ matrix.target }}-${{ github.sha }}
+          path: .output/*.zip
+          retention-days: 14
+          if-no-files-found: error
