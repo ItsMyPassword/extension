@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures.js";
 
 /** Locale-agnostic selector for the header's lock/settings icon buttons. */
-const HEADER_ACTION = 'header button[aria-label]';
+const HEADER_ACTION = "header button[aria-label]";
 
 test.describe("popup setup, lock and unlock", () => {
   test("first-run setup transitions to the main screen", async ({ context, extensionId }) => {
