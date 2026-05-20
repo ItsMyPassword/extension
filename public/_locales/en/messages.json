@@ -134,8 +134,12 @@
   },
   "badge_no_domain": { "message": "This page is not a regular website." },
   "badge_no_email": {
-    "message": "Type your email in the form, then I'll be able to generate."
+    "message": "Type your email in the form or right here, then I'll generate."
   },
+  "badge_email_placeholder": { "message": "you@example.com" },
+  "badge_unlock_master": { "message": "Unlock with master password" },
+  "badge_unlock_pin": { "message": "Unlock with PIN" },
+  "badge_open_extension": { "message": "Open the toolbar icon to set up" },
   "badge_failed": { "message": "Could not generate a password." },
   "badge_no_clipboard": { "message": "Couldn't access the clipboard." },
   "badge_customize": { "message": "Customise" }
