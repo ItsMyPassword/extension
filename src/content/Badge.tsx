@@ -9,7 +9,8 @@ import { render } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { registrableDomain } from "../shared/domain.js";
 import { ProfileEditor } from "../shared/ProfileEditor.js";
-import { IconBolt, IconCheck, IconCopy, IconSettings, IconClose } from "../shared/icons.js";
+import { Logo } from "../shared/Logo.js";
+import { IconCheck, IconCopy, IconSettings, IconClose } from "../shared/icons.js";
 import { t } from "../shared/i18n.js";
 import type { Profile } from "../shared/types.js";
 import { readUsername } from "./detect.js";
@@ -229,7 +230,7 @@ function Badge({ password, registerOpen, registerUpdate }: BadgeProps) {
           if (open) setShowSettings(false);
         }}
       >
-        <IconBolt size={14} />
+        <Logo size={14} />
       </button>
 
       {open ? (
