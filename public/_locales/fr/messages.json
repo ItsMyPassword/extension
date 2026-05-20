@@ -134,8 +134,12 @@
   },
   "badge_no_domain": { "message": "Cette page n'est pas un site web standard." },
   "badge_no_email": {
-    "message": "Saisissez votre email dans le formulaire, ensuite je pourrai générer."
+    "message": "Saisissez votre email dans le formulaire ou ici directement, puis je génère."
   },
+  "badge_email_placeholder": { "message": "vous@exemple.com" },
+  "badge_unlock_master": { "message": "Déverrouiller avec le mot de passe maître" },
+  "badge_unlock_pin": { "message": "Déverrouiller avec le PIN" },
+  "badge_open_extension": { "message": "Ouvrez l'extension pour configurer" },
   "badge_failed": { "message": "Impossible de générer un mot de passe." },
   "badge_no_clipboard": { "message": "Impossible d'accéder au presse-papier." },
   "badge_customize": { "message": "Personnaliser" }

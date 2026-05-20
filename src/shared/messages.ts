@@ -56,6 +56,7 @@ export interface StatusResponse {
   locked: boolean;
   isFirstRun: boolean;
   fingerprint: string | null;
+  hasPin: boolean;
 }
 
 export interface UnlockResponse {
