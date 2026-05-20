@@ -122,7 +122,7 @@ describe("router — fingerprint, profiles, state and wipe", () => {
     await handleRequest({ kind: "setup", master: "super-long-master" });
     const res = await handleRequest({ kind: "getState" });
     if (res.ok === false) throw new Error(res.error);
-    if (!("hasPin" in res)) throw new Error("unexpected response shape");
+    if (!("autoLockMinutes" in res)) throw new Error("unexpected response shape");
     expect(res.hasPin).toBe(false);
     expect(res.autoLockMinutes).toBeGreaterThan(0);
   });

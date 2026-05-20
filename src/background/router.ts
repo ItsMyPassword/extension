@@ -104,6 +104,7 @@ async function handleStatus(): Promise<StatusResponse> {
     locked: ses.locked,
     isFirstRun: state.fingerprint === undefined,
     fingerprint: state.fingerprint ?? null,
+    hasPin: state.pin !== undefined,
   };
 }
 
