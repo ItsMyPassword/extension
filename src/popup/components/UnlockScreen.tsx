@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { AnimatePresence, motion } from "framer-motion";
 import { send } from "../api.js";
 import { Header } from "./Header.js";
 import { t } from "../../shared/i18n.js";
+import { POP_IN, SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import { busy, errorMessage, fingerprint, livePreview, screen } from "../state.js";
 
 type Mode = "master" | "pin";
@@ -80,21 +82,30 @@ export function UnlockScreen({ hasPin }: Props) {
   const expected = fingerprint.value;
 
   return (
-    <div class="popup">
+    <motion.div
+      class="flex flex-col gap-4 p-5"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={SOFT_SPRING}
+    >
       <Header subtitle={t("unlock_title")} />
 
       {expected !== null ? (
-        <div class="fp-surface">
-          <span class="field__label">{t("unlock_expected_label")}</span>
+        <motion.div
+          class="flex flex-col gap-2 items-start p-4 rounded-[10px] bg-(--color-surface-sunken) border border-(--color-line)"
+          variants={POP_IN}
+          initial="initial"
+          animate="animate"
+        >
+          <span class="field-label">{t("unlock_expected_label")}</span>
           <span class="fingerprint">{expected}</span>
-        </div>
+        </motion.div>
       ) : null}
 
       {hasPin ? (
-        <div class="tabs" role="tablist">
+        <div class="segmented grid-cols-2" role="tablist">
           <button
             type="button"
-            class="tabs__button"
             role="tab"
             aria-pressed={mode === "pin"}
             onClick={() => setMode("pin")}
@@ -103,7 +114,6 @@ export function UnlockScreen({ hasPin }: Props) {
           </button>
           <button
             type="button"
-            class="tabs__button"
             role="tab"
             aria-pressed={mode === "master"}
             onClick={() => setMode("master")}
@@ -113,68 +123,98 @@ export function UnlockScreen({ hasPin }: Props) {
         </div>
       ) : null}
 
-      {mode === "master" ? (
-        <form class="popup" onSubmit={submitMaster}>
-          <label class="field">
-            <span class="field__label">{t("setup_master_label")}</span>
-            <input
-              class="input"
-              type="password"
-              value={master}
-              autocomplete="current-password"
-              autoFocus
-              required
-              onInput={(e) => setMaster((e.target as HTMLInputElement).value)}
-            />
-          </label>
+      <AnimatePresence mode="wait">
+        {mode === "master" ? (
+          <motion.form
+            key="master"
+            class="flex flex-col gap-4"
+            onSubmit={submitMaster}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0, transition: SOFT_SPRING }}
+            exit={{ opacity: 0, x: -8, transition: { duration: 0.12 } }}
+          >
+            <label class="flex flex-col gap-2">
+              <span class="field-label">{t("setup_master_label")}</span>
+              <input
+                class="input"
+                type="password"
+                value={master}
+                autocomplete="current-password"
+                autoFocus
+                required
+                onInput={(e) => setMaster((e.target as HTMLInputElement).value)}
+              />
+            </label>
 
-          {livePreview.value !== null && livePreview.value !== expected ? (
-            <div class="fp-surface fp-surface--warning fade-in">
-              <span class="field__label">{t("unlock_typed_label")}</span>
-              <span class="fingerprint">{livePreview.value}</span>
-              <span class="field__hint">{t("unlock_mismatch_hint")}</span>
-            </div>
-          ) : null}
+            <AnimatePresence>
+              {livePreview.value !== null && livePreview.value !== expected ? (
+                <motion.div
+                  key="typed"
+                  class="flex flex-col gap-2 items-start p-4 rounded-[10px] bg-amber-500/8 border border-amber-500/30"
+                  variants={POP_IN}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <span class="field-label">{t("unlock_typed_label")}</span>
+                  <span class="fingerprint">{livePreview.value}</span>
+                  <span class="field-hint">{t("unlock_mismatch_hint")}</span>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
 
-          {errorMessage.value !== null ? (
-            <div class="field__error" role="alert">
-              {errorMessage.value}
-            </div>
-          ) : null}
+            {errorMessage.value !== null ? (
+              <div class="field-error" role="alert">
+                {errorMessage.value}
+              </div>
+            ) : null}
 
-          <button type="submit" class="btn" disabled={busy.value}>
-            {busy.value ? t("unlock_unlocking") : t("common_unlock")}
-          </button>
-        </form>
-      ) : (
-        <form class="popup" onSubmit={submitPin}>
-          <label class="field">
-            <span class="field__label">{t("unlock_pin_label")}</span>
-            <input
-              class="input"
-              type="password"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              minLength={4}
-              maxLength={6}
-              value={pin}
-              autoFocus
-              required
-              onInput={(e) => setPin((e.target as HTMLInputElement).value.replace(/\D/g, ""))}
-            />
-          </label>
+            <motion.button type="submit" class="btn" whileTap={TAP_SCALE} disabled={busy.value}>
+              {busy.value ? t("unlock_unlocking") : t("common_unlock")}
+            </motion.button>
+          </motion.form>
+        ) : (
+          <motion.form
+            key="pin"
+            class="flex flex-col gap-4"
+            onSubmit={submitPin}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0, transition: SOFT_SPRING }}
+            exit={{ opacity: 0, x: 8, transition: { duration: 0.12 } }}
+          >
+            <label class="flex flex-col gap-2">
+              <span class="field-label">{t("unlock_pin_label")}</span>
+              <input
+                class="input input-mono tracking-widest text-center"
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                minLength={4}
+                maxLength={6}
+                value={pin}
+                autoFocus
+                required
+                onInput={(e) => setPin((e.target as HTMLInputElement).value.replace(/\D/g, ""))}
+              />
+            </label>
 
-          {errorMessage.value !== null ? (
-            <div class="field__error" role="alert">
-              {errorMessage.value}
-            </div>
-          ) : null}
+            {errorMessage.value !== null ? (
+              <div class="field-error" role="alert">
+                {errorMessage.value}
+              </div>
+            ) : null}
 
-          <button type="submit" class="btn" disabled={busy.value || pin.length < 4}>
-            {busy.value ? t("unlock_unlocking") : t("common_unlock")}
-          </button>
-        </form>
-      )}
-    </div>
+            <motion.button
+              type="submit"
+              class="btn"
+              whileTap={TAP_SCALE}
+              disabled={busy.value || pin.length < 4}
+            >
+              {busy.value ? t("unlock_unlocking") : t("common_unlock")}
+            </motion.button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { AnimatePresence, motion } from "framer-motion";
 import { send } from "../api.js";
 import { Header } from "./Header.js";
 import { t } from "../../shared/i18n.js";
+import { POP_IN, SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import {
   busy,
   errorMessage,
@@ -65,13 +67,19 @@ export function SetupScreen() {
   );
 
   return (
-    <form class="popup" onSubmit={submit}>
+    <motion.form
+      class="flex flex-col gap-4 p-5"
+      onSubmit={submit}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={SOFT_SPRING}
+    >
       <Header subtitle={t("setup_welcome")} />
 
-      <p class="popup__intro">{t("setup_intro")}</p>
+      <p class="text-(--color-ink-muted) text-sm leading-relaxed">{t("setup_intro")}</p>
 
-      <label class="field">
-        <span class="field__label">{t("setup_master_label")}</span>
+      <label class="flex flex-col gap-2">
+        <span class="field-label">{t("setup_master_label")}</span>
         <input
           class="input"
           type="password"
@@ -83,8 +91,8 @@ export function SetupScreen() {
         />
       </label>
 
-      <label class="field">
-        <span class="field__label">{t("setup_confirm_label")}</span>
+      <label class="flex flex-col gap-2">
+        <span class="field-label">{t("setup_confirm_label")}</span>
         <input
           class="input"
           type="password"
@@ -94,22 +102,41 @@ export function SetupScreen() {
         />
       </label>
 
-      {livePreview.value !== null ? (
-        <div class="fp-surface fade-in" aria-live="polite">
-          <span class="fingerprint">{livePreview.value}</span>
-          <span class="field__hint">{t("setup_fingerprint_hint")}</span>
-        </div>
-      ) : null}
+      <AnimatePresence>
+        {livePreview.value !== null ? (
+          <motion.div
+            key="preview"
+            class="flex flex-col gap-2 items-start p-4 rounded-[10px] bg-(--color-surface-sunken) border border-(--color-line)"
+            variants={POP_IN}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            aria-live="polite"
+          >
+            <span class="fingerprint">{livePreview.value}</span>
+            <span class="field-hint">{t("setup_fingerprint_hint")}</span>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-      {errorMessage.value !== null ? (
-        <div class="field__error" role="alert">
-          {errorMessage.value}
-        </div>
-      ) : null}
+      <AnimatePresence>
+        {errorMessage.value !== null ? (
+          <motion.div
+            key="error"
+            class="field-error"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            role="alert"
+          >
+            {errorMessage.value}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-      <button type="submit" class="btn" disabled={busy.value}>
+      <motion.button type="submit" class="btn" whileTap={TAP_SCALE} disabled={busy.value}>
         {busy.value ? t("setup_creating") : t("setup_create_button")}
-      </button>
-    </form>
+      </motion.button>
+    </motion.form>
   );
 }

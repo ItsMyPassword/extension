@@ -1,4 +1,5 @@
 import { useEffect } from "preact/hooks";
+import { AnimatePresence } from "framer-motion";
 import { send } from "./api.js";
 import { LoadingScreen } from "./components/LoadingScreen.js";
 import { MainScreen } from "./components/MainScreen.js";
@@ -12,15 +13,23 @@ export function App() {
     void bootstrap();
   }, []);
 
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      {renderScreen()}
+    </AnimatePresence>
+  );
+}
+
+function renderScreen() {
   switch (screen.value) {
     case "loading":
-      return <LoadingScreen />;
+      return <LoadingScreen key="loading" />;
     case "setup":
-      return <SetupScreen />;
+      return <SetupScreen key="setup" />;
     case "unlock":
-      return <UnlockScreen hasPin={hasPin.value} />;
+      return <UnlockScreen key="unlock" hasPin={hasPin.value} />;
     case "main":
-      return <MainScreen />;
+      return <MainScreen key="main" />;
   }
 }
 
