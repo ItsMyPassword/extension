@@ -47,6 +47,13 @@ export function attachBadge(password: HTMLInputElement): BadgeController {
     updateRef = fn;
   };
 
+  // Width must match .badge__panel in badge.css. We use it to decide which
+  // side of the trigger the panel should open from.
+  const PANEL_WIDTH = 300;
+  const VIEWPORT_PADDING = 8;
+  const TRIGGER_SIZE = 24;
+  const TRIGGER_OFFSET_FROM_FIELD = 28;
+
   const position = () => {
     const rect = password.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) {
@@ -54,8 +61,21 @@ export function attachBadge(password: HTMLInputElement): BadgeController {
       return;
     }
     host.style.display = "block";
+    const triggerLeft = rect.right - TRIGGER_OFFSET_FROM_FIELD;
     host.style.top = `${window.scrollY + rect.top}px`;
-    host.style.left = `${window.scrollX + rect.right - 28}px`;
+    host.style.left = `${window.scrollX + triggerLeft}px`;
+
+    // Decide which side the panel should open from. Default is "right"
+    // (the panel anchors to the trigger's right edge and extends left,
+    // which works for most fields). If there isn't enough room on the
+    // left, flip to "left" — the panel anchors to the trigger's left
+    // edge and extends right instead.
+    const viewportWidth = document.documentElement.clientWidth;
+    const panelLeftIfRightAnchored = triggerLeft + TRIGGER_SIZE - PANEL_WIDTH;
+    const panelRightIfLeftAnchored = triggerLeft + PANEL_WIDTH;
+    const overflowsLeft = panelLeftIfRightAnchored < VIEWPORT_PADDING;
+    const fitsOnRight = panelRightIfLeftAnchored <= viewportWidth - VIEWPORT_PADDING;
+    host.dataset.side = overflowsLeft && fitsOnRight ? "left" : "right";
   };
 
   render(<Badge password={password} registerOpen={setOpen} registerUpdate={setUpdate} />, mount);

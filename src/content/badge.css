@@ -101,6 +101,14 @@
   transform-origin: top right;
 }
 
+/* The host element flips this attribute based on viewport edge detection;
+   see Badge.tsx :: position(). */
+:host([data-side="left"]) .badge__panel {
+  right: auto;
+  left: 0;
+  transform-origin: top left;
+}
+
 @keyframes badge-in {
   from {
     opacity: 0;
