@@ -40,7 +40,16 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "dist/", ".output/", ".wxt/", "coverage/", "*.config.js"],
+    ignores: [
+      "node_modules/",
+      "dist/",
+      ".output/",
+      ".wxt/",
+      "coverage/",
+      "playwright-report/",
+      "test-results/",
+      "*.config.js",
+    ],
   },
   prettier,
 ];
