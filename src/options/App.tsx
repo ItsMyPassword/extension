@@ -6,7 +6,7 @@ import { SitesSection } from "./components/SitesSection.js";
 import { PinSection } from "./components/PinSection.js";
 import { DangerSection } from "./components/DangerSection.js";
 import { ProfileEditor } from "../shared/ProfileEditor.js";
-import { IconBolt } from "../shared/icons.js";
+import { Logo } from "../shared/Logo.js";
 import { t } from "../shared/i18n.js";
 import { SOFT_SPRING } from "../shared/motion.js";
 import type { Profile } from "../shared/types.js";
@@ -125,8 +125,8 @@ function PageHeader() {
       transition={SOFT_SPRING}
     >
       <div class="flex items-center gap-3">
-        <span class="grid place-items-center w-8 h-8 rounded-[10px] bg-(--color-accent-500)/12 text-(--color-accent-600) dark:text-(--color-accent-400)">
-          <IconBolt size={18} />
+        <span class="grid place-items-center text-(--color-accent-600) dark:text-(--color-accent-400)">
+          <Logo size={28} />
         </span>
         <h1 class="m-0 text-2xl font-semibold tracking-[-0.025em]">{t("extName")}</h1>
       </div>

@@ -1,6 +1,6 @@
 import type { JSX } from "preact";
 import { motion } from "framer-motion";
-import { IconBolt } from "../../shared/icons.js";
+import { Logo } from "../../shared/Logo.js";
 import { t } from "../../shared/i18n.js";
 import { SOFT_SPRING } from "../../shared/motion.js";
 
@@ -17,12 +17,12 @@ export function Header({ subtitle, fingerprint, actions }: Props) {
       <div class="flex flex-col gap-0.5 min-w-0 flex-1">
         <div class="flex items-center gap-2">
           <motion.span
-            class="grid place-items-center w-[22px] h-[22px] rounded-md bg-(--color-accent-500)/12 text-(--color-accent-600) dark:text-(--color-accent-400)"
-            initial={{ rotate: -8, scale: 0.6, opacity: 0 }}
-            animate={{ rotate: 0, scale: 1, opacity: 1 }}
+            class="grid place-items-center text-(--color-accent-600) dark:text-(--color-accent-400)"
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={SOFT_SPRING}
           >
-            <IconBolt size={14} />
+            <Logo size={20} />
           </motion.span>
           <span class="font-semibold tracking-[-0.015em] text-sm text-(--color-ink)">
             {t("extName")}
