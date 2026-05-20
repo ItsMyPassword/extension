@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { AnimatePresence, motion } from "framer-motion";
 import { send } from "../api.js";
 import { Header } from "./Header.js";
 import {
@@ -10,6 +11,7 @@ import {
   IconSettings,
 } from "../../shared/icons.js";
 import { t } from "../../shared/i18n.js";
+import { POP_IN, SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import {
   activeDomain,
   activeEmail,
@@ -71,38 +73,45 @@ export function MainScreen() {
   }, []);
 
   return (
-    <div class="popup">
+    <motion.div
+      class="flex flex-col gap-4 p-5"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={SOFT_SPRING}
+    >
       <Header
         subtitle={activeDomain.value ?? undefined}
         fingerprint={fingerprint.value}
         actions={
           <>
-            <button
+            <motion.button
               type="button"
-              class="btn btn--quiet btn--icon"
+              class="btn btn-quiet btn-icon"
+              whileTap={TAP_SCALE}
               onClick={onSettings}
               aria-label={t("common_settings")}
             >
               <IconSettings />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="button"
-              class="btn btn--quiet btn--icon"
+              class="btn btn-quiet btn-icon"
+              whileTap={TAP_SCALE}
               onClick={onLock}
               aria-label={t("common_lock")}
             >
               <IconLock />
-            </button>
+            </motion.button>
           </>
         }
       />
 
       {activeDomain.value === null ? (
-        <p class="popup__intro">{t("main_no_site")}</p>
+        <p class="text-(--color-ink-muted) text-sm leading-relaxed">{t("main_no_site")}</p>
       ) : (
         <>
-          <label class="field">
-            <span class="field__label">{t("main_username_label")}</span>
+          <label class="flex flex-col gap-2">
+            <span class="field-label">{t("main_username_label")}</span>
             <input
               class="input"
               type="text"
@@ -115,48 +124,69 @@ export function MainScreen() {
             />
           </label>
 
-          <button
+          <motion.button
             type="button"
             class="btn"
+            whileTap={TAP_SCALE}
             onClick={generate}
             disabled={busy.value || !canGenerate.value}
           >
             {busy.value ? t("common_generating") : t("common_generate")}
-          </button>
+          </motion.button>
 
-          {generated.value !== null ? (
-            <div class="generated">
-              <code
-                class={revealed ? "generated__value" : "generated__value generated__value--masked"}
+          <AnimatePresence>
+            {generated.value !== null ? (
+              <motion.div
+                key="generated"
+                class="flex flex-col gap-3 p-4 rounded-[10px] bg-(--color-surface-sunken) border border-(--color-line)"
+                variants={POP_IN}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                layout
               >
-                {revealed ? generated.value : "•".repeat(Math.min(generated.value.length, 24))}
-              </code>
-              <div class="generated__actions">
-                <button
-                  type="button"
-                  class="btn btn--ghost btn--sm"
-                  onClick={() => setRevealed((v) => !v)}
+                <code
+                  class={
+                    revealed
+                      ? "font-mono text-sm break-all select-all cursor-text text-(--color-ink) min-h-5"
+                      : "font-mono text-sm break-all select-all cursor-text text-(--color-ink-muted) min-h-5 tracking-[0.15em]"
+                  }
                 >
-                  {revealed ? <IconEyeOff size={14} /> : <IconEye size={14} />}
-                  {revealed ? t("common_hide") : t("common_reveal")}
-                </button>
-                <button type="button" class="btn btn--ghost btn--sm" onClick={copy}>
-                  {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
-                  {copied ? t("common_copied") : t("common_copy")}
-                </button>
-              </div>
-            </div>
-          ) : !canGenerate.value ? (
-            <p class="field__hint">{t("main_no_email")}</p>
-          ) : null}
+                  {revealed ? generated.value : "•".repeat(Math.min(generated.value.length, 24))}
+                </code>
+                <div class="flex gap-2">
+                  <motion.button
+                    type="button"
+                    class="btn btn-ghost btn-sm flex-1"
+                    whileTap={TAP_SCALE}
+                    onClick={() => setRevealed((v) => !v)}
+                  >
+                    {revealed ? <IconEyeOff size={14} /> : <IconEye size={14} />}
+                    {revealed ? t("common_hide") : t("common_reveal")}
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    class="btn btn-ghost btn-sm flex-1"
+                    whileTap={TAP_SCALE}
+                    onClick={copy}
+                  >
+                    {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                    {copied ? t("common_copied") : t("common_copy")}
+                  </motion.button>
+                </div>
+              </motion.div>
+            ) : !canGenerate.value ? (
+              <p class="field-hint">{t("main_no_email")}</p>
+            ) : null}
+          </AnimatePresence>
 
           {errorMessage.value !== null ? (
-            <div class="field__error" role="alert">
+            <div class="field-error" role="alert">
               {errorMessage.value}
             </div>
           ) : null}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }
