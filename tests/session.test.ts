@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { installChromeMock } from "./helpers/chrome-mock.js";
 import {
+  hardenSessionStorage,
   lock,
   readMaster,
   registerAutoLockHandler,
@@ -12,6 +13,13 @@ const mock = installChromeMock();
 
 beforeEach(() => {
   mock.reset();
+});
+
+describe("hardenSessionStorage", () => {
+  it("is idempotent and does not throw when setAccessLevel is available", async () => {
+    await expect(hardenSessionStorage()).resolves.toBeUndefined();
+    await expect(hardenSessionStorage()).resolves.toBeUndefined();
+  });
 });
 
 describe("session lifecycle", () => {

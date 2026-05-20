@@ -9,7 +9,17 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.d.ts", "src/**/wordlist.ts"],
+      // Coverage is enforced on testable logic only:
+      //  - wordlist.ts is a generated table, not code
+      //  - entrypoints/ are thin chrome.* wiring layers, tested via E2E
+      //  - .tsx popup components are tested via E2E in a later milestone
+      exclude: [
+        "src/**/*.d.ts",
+        "src/**/*.tsx",
+        "src/background/crypto/wordlist.ts",
+        "src/entrypoints/**",
+        "src/popup/**",
+      ],
       thresholds: {
         statements: 90,
         branches: 85,

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { installChromeMock } from "./helpers/chrome-mock.js";
 import { handleRequest } from "../src/background/router.js";
+import { DEFAULT_RANDOM_PROFILE } from "../src/shared/types.js";
 
 const mock = installChromeMock();
 
@@ -84,3 +85,58 @@ describe("router — generate", () => {
     expect(a.password.length).toBeGreaterThanOrEqual(5);
   });
 }, 120_000);
+
+describe("router — fingerprint, profiles, state and wipe", () => {
+  it("returns a fingerprint without requiring an unlocked session", async () => {
+    const res = await handleRequest({ kind: "fingerprint", master: "any-master" });
+    if (res.ok === false) throw new Error(res.error);
+    if (!("fingerprint" in res)) throw new Error("missing fingerprint");
+    expect(res.fingerprint.split(" ")).toHaveLength(3);
+  });
+
+  it("reads and writes per-site profiles", async () => {
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    const before = await handleRequest({ kind: "getProfile", domain: "example.com" });
+    if (before.ok === false) throw new Error(before.error);
+    if (!("isOverride" in before)) throw new Error("unexpected response shape");
+    expect(before.isOverride).toBe(false);
+
+    const override = { ...DEFAULT_RANDOM_PROFILE, length: 24 } as const;
+    const set = await handleRequest({
+      kind: "setProfile",
+      domain: "example.com",
+      profile: override,
+    });
+    expect(set.ok).toBe(true);
+
+    const after = await handleRequest({ kind: "getProfile", domain: "example.com" });
+    if (after.ok === false) throw new Error(after.error);
+    if (!("isOverride" in after)) throw new Error("unexpected response shape");
+    expect(after.isOverride).toBe(true);
+    expect(after.profile).toEqual(override);
+  });
+
+  it("reports state via getState", async () => {
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    const res = await handleRequest({ kind: "getState" });
+    if (res.ok === false) throw new Error(res.error);
+    if (!("hasPin" in res)) throw new Error("unexpected response shape");
+    expect(res.hasPin).toBe(false);
+    expect(res.autoLockMinutes).toBeGreaterThan(0);
+  });
+
+  it("wipes everything and returns to first-run", async () => {
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    await handleRequest({ kind: "wipe" });
+    const status = await handleRequest({ kind: "status" });
+    if (status.ok === false) throw new Error(status.error);
+    if (!("isFirstRun" in status)) throw new Error("unexpected response shape");
+    expect(status.isFirstRun).toBe(true);
+    expect(status.locked).toBe(true);
+  });
+
+  it("rejects unlock before setup", async () => {
+    const res = await handleRequest({ kind: "unlock", master: "anything" });
+    expect(res.ok).toBe(false);
+  });
+}, 60_000);
