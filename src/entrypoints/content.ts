@@ -7,8 +7,17 @@
  * inside the background service worker.
  */
 import { defineContentScript } from "wxt/utils/define-content-script";
-import { attachBadge, showSaveBanner, type BadgeController } from "../content/Badge.js";
-import { findPasswordFields, findUsernameFieldFor } from "../content/detect.js";
+import {
+  attachBadge,
+  showRotateBanner,
+  showSaveBanner,
+  type BadgeController,
+} from "../content/Badge.js";
+import {
+  findPasswordFields,
+  findUsernameFieldFor,
+  isChangePasswordPage,
+} from "../content/detect.js";
 import { send } from "../content/messaging.js";
 import { registrableDomain } from "../shared/domain.js";
 
@@ -103,6 +112,22 @@ export default defineContentScript({
     // if one exists for this domain on page load, re-surface the banner.
     if (window === window.top) {
       const currentDomain = registrableDomain(window.location.href);
+      if (currentDomain !== null && isChangePasswordPage(document)) {
+        // Password-change form detected → if the user has a saved
+        // account for this site, surface a rotation banner. We only
+        // auto-rotate for a single matching entry; with several we
+        // pick the most recently used and let the user dismiss.
+        send({ kind: "listAccounts", domain: currentDomain })
+          .then((res) => {
+            const entries = res.entries;
+            if (entries.length === 0) return;
+            const best = [...entries].sort((a, b) => b.lastUsedAt - a.lastUsedAt)[0]!;
+            void showRotateBanner({ entry: best });
+          })
+          .catch(() => {
+            /* swallowed */
+          });
+      }
       if (currentDomain !== null) {
         send({ kind: "getPendingSave", domain: currentDomain })
           .then((res) => {

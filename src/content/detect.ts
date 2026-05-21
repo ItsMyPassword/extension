@@ -85,6 +85,32 @@ export function readUsername(password: HTMLInputElement): string {
   return field.value.trim();
 }
 
+/**
+ * Heuristic that flags a form (or the page) as a password-change UI.
+ *
+ * Triggers when:
+ *  - any form contains 2 or more visible password inputs, OR
+ *  - the page URL / `<title>` contains words like "change password",
+ *    "reset password", "update password", "new password".
+ *
+ * Conservative on purpose: false positives nag the user; misses are
+ * cheap because the manual "Rotate" button on the detail page covers
+ * the case.
+ */
+export function isChangePasswordPage(doc: Document = document): boolean {
+  const passwordsInAnyForm = (form: HTMLFormElement): HTMLInputElement[] =>
+    Array.from(form.querySelectorAll<HTMLInputElement>('input[type="password"]')).filter(
+      isElementVisible,
+    );
+  for (const form of doc.querySelectorAll<HTMLFormElement>("form")) {
+    if (passwordsInAnyForm(form).length >= 2) return true;
+  }
+  const hints = `${doc.location?.href ?? ""} ${doc.title}`.toLowerCase();
+  return /(change|reset|update|new)\s*[-_]?\s*password|password\s*[-_]?\s*(change|reset|update)|new\s*[-_]?\s*password/.test(
+    hints,
+  );
+}
+
 function isElementVisible(el: HTMLInputElement): boolean {
   // happy-dom does not implement getBoundingClientRect properly for hidden
   // nodes, so we look at the layout-affecting attributes only.

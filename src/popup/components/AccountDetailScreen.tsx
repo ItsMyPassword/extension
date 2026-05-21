@@ -28,6 +28,7 @@ export function AccountDetailScreen() {
   const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState<"password" | "username" | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [rotated, setRotated] = useState(false);
 
   // Recompute password whenever the entry's profile changes (initial mount
   // + every profile mutation below).
@@ -193,6 +194,30 @@ export function AccountDetailScreen() {
     }
   };
 
+  const rotateCounter = async () => {
+    const bumped: Profile = {
+      ...entry.profile,
+      counter: (entry.profile.counter ?? 1) + 1,
+    };
+    try {
+      const res = await send({
+        kind: "updateAccountProfile",
+        domain: entry.domain,
+        username: entry.username,
+        profile: bumped,
+      });
+      const updated = res.entry;
+      allAccounts.value = allAccounts.value.map((e) =>
+        e.domain === entry.domain && e.username === entry.username ? updated : e,
+      );
+      selectedAccount.value = updated;
+      setRotated(true);
+      setTimeout(() => setRotated(false), 2500);
+    } catch {
+      /* swallowed */
+    }
+  };
+
   const remove = async () => {
     await send({ kind: "deleteAccount", domain: entry.domain, username: entry.username });
     allAccounts.value = allAccounts.value.filter(
@@ -344,6 +369,20 @@ export function AccountDetailScreen() {
           <ProfileEditor profile={entry.profile} onChange={updateProfile} compact />
         </div>
       </motion.section>
+
+      <div class="flex flex-col gap-2 pt-1">
+        <h2 class="m-0 text-sm font-semibold tracking-[-0.01em]">{t("detail_rotate_section")}</h2>
+        <span class="text-xs text-(--color-ink-muted) leading-snug">{t("detail_rotate_hint")}</span>
+        <motion.button
+          type="button"
+          class="btn btn-ghost self-start"
+          whileTap={TAP_SCALE}
+          onClick={() => void rotateCounter()}
+        >
+          {rotated ? <IconCheck size={14} /> : null}
+          {rotated ? t("detail_rotate_done") : t("detail_rotate_cta")}
+        </motion.button>
+      </div>
 
       <div class="flex flex-col gap-2 pt-2">
         <span class="text-xs text-(--color-ink-subtle)">
