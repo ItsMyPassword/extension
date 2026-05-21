@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { send } from "../api.js";
 import { Header } from "./Header.js";
+import { SavedAccountsForDomain } from "./SavedAccountsForDomain.js";
 import {
   IconCheck,
   IconChevronDown,
@@ -23,6 +24,8 @@ import {
   errorMessage,
   fingerprint,
   generated,
+  historyEnabled,
+  savedAccounts,
   screen,
 } from "../state.js";
 
@@ -75,6 +78,14 @@ export function MainScreen() {
       busy.value = false;
     }
   }, [profile]);
+
+  const pickSaved = useCallback(
+    (username: string) => {
+      activeEmail.value = username;
+      void generate();
+    },
+    [generate],
+  );
 
   const updateProfile = useCallback(async (next: Profile) => {
     setProfile(next);
@@ -147,6 +158,10 @@ export function MainScreen() {
         <p class="text-(--color-ink-muted) text-sm leading-relaxed">{t("main_no_site")}</p>
       ) : (
         <>
+          {historyEnabled.value && savedAccounts.value.length > 0 ? (
+            <SavedAccountsForDomain onPick={pickSaved} />
+          ) : null}
+
           <label class="flex flex-col gap-2">
             <span class="field-label">{t("main_username_label")}</span>
             <input
