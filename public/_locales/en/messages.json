@@ -142,5 +142,24 @@
   "badge_open_extension": { "message": "Open the toolbar icon to set up" },
   "badge_failed": { "message": "Could not generate a password." },
   "badge_no_clipboard": { "message": "Couldn't access the clipboard." },
-  "badge_customize": { "message": "Customise" }
+  "badge_customize": { "message": "Customise" },
+
+  "history_section_title": { "message": "Saved accounts" },
+  "history_section_hint": { "message": "Keep an encrypted list of the accounts you have created on each site. Username and site only — passwords are never stored." },
+  "history_toggle_label": { "message": "Remember the accounts I create" },
+  "history_disable_confirm_title": { "message": "Disable account history?" },
+  "history_disable_confirm_body": { "message": "This will permanently delete your saved accounts. This cannot be undone." },
+  "history_disable_confirm_cta": { "message": "Disable and delete" },
+  "history_setup_title": { "message": "Remember your accounts?" },
+  "history_setup_body": { "message": "When you fill a password through the badge, ItsMyPassword can save the site and username (never the password) so you can find your accounts later. Encrypted with your master password." },
+  "history_setup_enable": { "message": "Enable history" },
+  "history_setup_skip": { "message": "Not now" },
+  "history_save_prompt": { "message": "Save this account?" },
+  "history_save_cta": { "message": "Save" },
+  "history_save_dismiss": { "message": "Dismiss" },
+  "history_empty": { "message": "No saved accounts yet." },
+  "history_saved_for_site": { "message": "Saved accounts for this site" },
+  "history_search_placeholder": { "message": "Search domain or username" },
+  "history_relative_just_now": { "message": "just now" },
+  "history_delete_aria": { "message": "Delete account" }
 }
