@@ -27,6 +27,7 @@ import badgeStyles from "./badge.css?inline";
 
 const HOST_TAG = "itsmypassword-badge";
 const BANNER_TAG = "itsmypassword-save-banner";
+const ROTATE_TAG = "itsmypassword-rotate-banner";
 
 /**
  * Write a value to an input using the prototype setter so React/Vue/etc
@@ -152,6 +153,113 @@ function SaveBanner({
         </button>
         <button type="button" class="badge__btn" onClick={dismiss}>
           {t("history_save_dismiss")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Top-right banner shown when a password-change form is detected on a
+ * page where the user already has a saved account. Offers to rotate
+ * the entry's counter, write the new password into the new-password
+ * field(s), and persist the bumped profile.
+ */
+export async function showRotateBanner({ entry }: { entry: AccountEntry }): Promise<void> {
+  document.querySelectorAll(ROTATE_TAG).forEach((el) => el.remove());
+
+  const host = document.createElement(ROTATE_TAG);
+  host.style.cssText =
+    "position: fixed; top: 16px; right: 16px; z-index: 2147483647; pointer-events: none;";
+  const shadow = host.attachShadow({ mode: "closed" });
+  const styleEl = document.createElement("style");
+  styleEl.textContent = `${atomStyles}\n${badgeStyles}`;
+  shadow.appendChild(styleEl);
+  const mount = document.createElement("div");
+  shadow.appendChild(mount);
+  document.documentElement.appendChild(host);
+
+  const dismiss = () => {
+    render(null, mount);
+    host.remove();
+  };
+
+  render(<RotateBanner entry={entry} onClose={dismiss} />, mount);
+  setTimeout(dismiss, 20_000);
+}
+
+function RotateBanner({ entry, onClose }: { entry: AccountEntry; onClose: () => void }) {
+  const rotate = async () => {
+    try {
+      const bumped: Profile = {
+        ...entry.profile,
+        counter: (entry.profile.counter ?? 1) + 1,
+      };
+      const old = await send({
+        kind: "generate",
+        domain: entry.domain,
+        email: entry.username,
+        profile: entry.profile,
+      });
+      const fresh = await send({
+        kind: "generate",
+        domain: entry.domain,
+        email: entry.username,
+        profile: bumped,
+      });
+      // Fill the page's password fields, writing the old value into the
+      // "current-password" slot and the new value everywhere else.
+      const passwordInputs = Array.from(
+        document.querySelectorAll<HTMLInputElement>('input[type="password"]'),
+      ).filter((el) => el.offsetParent !== null);
+      for (const input of passwordInputs) {
+        const hintParts = [
+          input.getAttribute("autocomplete") ?? "",
+          input.name ?? "",
+          input.id ?? "",
+        ];
+        const hint = hintParts.join(" ").toLowerCase();
+        if (hint.includes("current") || hint.includes("old")) {
+          writeInput(input, old.password);
+        } else {
+          writeInput(input, fresh.password);
+        }
+      }
+      try {
+        await navigator.clipboard.writeText(fresh.password);
+        await send({ kind: "armClipboardClear" });
+      } catch {
+        /* clipboard requires focus on some pages; best-effort */
+      }
+      await send({
+        kind: "updateAccountProfile",
+        domain: entry.domain,
+        username: entry.username,
+        profile: bumped,
+      });
+    } catch {
+      /* swallowed — banner closes anyway */
+    }
+    onClose();
+  };
+
+  return (
+    <div class="save-banner" role="alertdialog" aria-label={t("rotate_banner_title")}>
+      <div class="save-banner__head">
+        <Logo size={16} />
+        <span class="save-banner__title">{t("rotate_banner_title")}</span>
+      </div>
+      <div class="save-banner__meta">
+        <span class="save-banner__domain">{entry.domain}</span>
+        <span class="save-banner__username">{entry.username}</span>
+      </div>
+      <p class="badge__status">{t("rotate_banner_body")}</p>
+      <div class="save-banner__actions">
+        <button type="button" class="badge__btn badge__btn--primary" onClick={rotate}>
+          {t("rotate_cta")}
+        </button>
+        <button type="button" class="badge__btn" onClick={onClose}>
+          {t("rotate_dismiss")}
         </button>
       </div>
     </div>

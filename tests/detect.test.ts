@@ -2,7 +2,12 @@
  * @vitest-environment happy-dom
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { findPasswordFields, findUsernameFieldFor, readUsername } from "../src/content/detect.js";
+import {
+  findPasswordFields,
+  findUsernameFieldFor,
+  isChangePasswordPage,
+  readUsername,
+} from "../src/content/detect.js";
 
 beforeEach(() => {
   document.body.innerHTML = "";
@@ -130,5 +135,45 @@ describe("readUsername", () => {
     document.body.innerHTML = `<input type="password" id="pw" />`;
     const pw = document.querySelector<HTMLInputElement>("#pw")!;
     expect(readUsername(pw)).toBe("");
+  });
+});
+
+describe("isChangePasswordPage", () => {
+  it("detects a form with two visible password inputs", () => {
+    document.body.innerHTML = `
+      <form>
+        <input type="password" name="current" />
+        <input type="password" name="new" />
+      </form>`;
+    expect(isChangePasswordPage(document)).toBe(true);
+  });
+
+  it("detects three-field flows (current + new + confirm)", () => {
+    document.body.innerHTML = `
+      <form>
+        <input type="password" name="current-password" />
+        <input type="password" name="new-password" />
+        <input type="password" name="confirm-password" />
+      </form>`;
+    expect(isChangePasswordPage(document)).toBe(true);
+  });
+
+  it("falls back to title hints when only one password field is present", () => {
+    document.title = "Change password";
+    document.body.innerHTML = `
+      <form>
+        <input type="password" />
+      </form>`;
+    expect(isChangePasswordPage(document)).toBe(true);
+  });
+
+  it("rejects a plain sign-in form", () => {
+    document.title = "Sign in";
+    document.body.innerHTML = `
+      <form>
+        <input type="email" />
+        <input type="password" />
+      </form>`;
+    expect(isChangePasswordPage(document)).toBe(false);
   });
 });
