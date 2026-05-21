@@ -6,7 +6,7 @@
  * discriminated-union payload. Centralising the type here keeps both sides
  * honest about the shape of requests and responses.
  */
-import type { Profile } from "./types.js";
+import type { AccountEntry, Profile } from "./types.js";
 
 export type Request =
   | { kind: "status" }
@@ -24,7 +24,11 @@ export type Request =
   | { kind: "setPin"; pin: string }
   | { kind: "removePin" }
   | { kind: "getState" }
-  | { kind: "wipe" };
+  | { kind: "wipe" }
+  | { kind: "listAccounts"; domain?: string }
+  | { kind: "recordAccount"; domain: string; username: string }
+  | { kind: "deleteAccount"; domain: string; username: string }
+  | { kind: "setHistoryEnabled"; enabled: boolean };
 
 // All responses share the same shape on success; we use a small set of
 // payload types and let TS pick the right one via the discriminator.
@@ -40,7 +44,13 @@ export type Response<T extends Request> = T extends { kind: "status" }
           ? GetProfileResponse
           : T extends { kind: "getState" }
             ? GetStateResponse
-            : OkResponse;
+            : T extends { kind: "listAccounts" }
+              ? ListAccountsResponse
+              : T extends { kind: "recordAccount" }
+                ? RecordAccountResponse
+                : T extends { kind: "setHistoryEnabled" }
+                  ? SetHistoryEnabledResponse
+                  : OkResponse;
 
 export interface OkResponse {
   ok: true;
@@ -85,7 +95,23 @@ export interface GetStateResponse {
   defaultProfile: Profile;
   autoLockMinutes: number;
   hasPin: boolean;
+  historyEnabled: boolean;
   sites: Record<string, Profile>;
+}
+
+export interface ListAccountsResponse {
+  ok: true;
+  entries: AccountEntry[];
+}
+
+export interface RecordAccountResponse {
+  ok: true;
+  entry: AccountEntry;
+}
+
+export interface SetHistoryEnabledResponse {
+  ok: true;
+  cleared: number;
 }
 
 /** Discriminator for `chrome.runtime.onMessage` callbacks. */
