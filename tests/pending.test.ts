@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { installChromeMock } from "./helpers/chrome-mock.js";
-import {
-  clearPendingSave,
-  getPendingSave,
-  setPendingSave,
-} from "../src/background/pending.js";
+import { clearPendingSave, getPendingSave, setPendingSave } from "../src/background/pending.js";
 
 const mock = installChromeMock();
 
