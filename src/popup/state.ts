@@ -7,7 +7,7 @@
 import { computed, signal } from "@preact/signals";
 import type { AccountEntry } from "../shared/types.js";
 
-export type Screen = "loading" | "setup" | "unlock" | "main" | "settings";
+export type Screen = "loading" | "setup" | "unlock" | "main" | "account-detail" | "settings";
 
 export const screen = signal<Screen>("loading");
 
@@ -43,6 +43,12 @@ export const savedAccounts = signal<AccountEntry[]>([]);
 
 /** All saved accounts across every domain, populated on bootstrap. */
 export const allAccounts = signal<AccountEntry[]>([]);
+
+/** The account whose detail page is currently open. */
+export const selectedAccount = signal<AccountEntry | null>(null);
+
+/** Whether the popup may fall back to Google's favicon CDN. */
+export const faviconFallbackEnabled = signal<boolean>(true);
 
 export const canGenerate = computed(
   () => activeDomain.value !== null && activeEmail.value.trim().length > 0,

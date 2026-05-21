@@ -170,5 +170,30 @@
   "history_delete_aria": { "message": "Delete account" },
 
   "main_add_new": { "message": "New account" },
-  "main_back_to_list": { "message": "Back to accounts" }
+  "main_back_to_list": { "message": "Back to accounts" },
+
+  "row_menu_aria": { "message": "More actions" },
+  "row_menu_copy_username": { "message": "Copy username" },
+  "row_menu_copy_password": { "message": "Copy password" },
+  "row_menu_open": { "message": "Open" },
+
+  "detail_missing": { "message": "This account could not be found." },
+  "detail_password_label": { "message": "Password" },
+  "detail_profile_section": { "message": "Generation parameters" },
+  "detail_profile_hint": {
+    "message": "These settings are saved on this account only. Changing them never affects other accounts on the same site."
+  },
+  "detail_last_used": {
+    "message": "Last used $WHEN$",
+    "placeholders": { "when": { "content": "$1" } }
+  },
+  "detail_delete_cta": { "message": "Delete this account" },
+  "detail_delete_confirm": { "message": "Permanently remove this saved account?" },
+  "detail_rename_failed": { "message": "Could not rename this account." },
+
+  "favicon_section_title": { "message": "Site icons" },
+  "favicon_section_hint": {
+    "message": "When the browser has no cached icon for a domain, ItsMyPassword can ask Google's public favicon service for it. Turn this off to stay 100% local (initials placeholder)."
+  },
+  "favicon_toggle_label": { "message": "Fetch missing icons from Google" }
 }

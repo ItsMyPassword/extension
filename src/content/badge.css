@@ -325,6 +325,47 @@
   border-color: var(--color-line-strong);
 }
 
+.badge__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@keyframes badge-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.badge__skeleton .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-sunken) 0%,
+    color-mix(in srgb, var(--color-surface-sunken) 60%, var(--color-surface-elev)) 50%,
+    var(--color-surface-sunken) 100%
+  );
+  background-size: 200% 100%;
+  animation: badge-shimmer 1.4s linear infinite;
+  border-radius: 10px;
+}
+
+.badge__skeleton .skeleton--row {
+  height: 12px;
+}
+
+.badge__skeleton .skeleton--row:nth-child(1) {
+  width: 70%;
+}
+.badge__skeleton .skeleton--row:nth-child(2) {
+  width: 92%;
+}
+.badge__skeleton .skeleton--row:nth-child(3) {
+  width: 56%;
+}
+
 /* Top-right Dashlane-style "Save this account?" banner. Rendered in its
    own shadow-DOM host that sits at the viewport edge, independent of the
    per-field badge. */

@@ -29,9 +29,11 @@ const BANNER_TAG = "itsmypassword-save-banner";
 export async function showSaveBanner({
   domain,
   username,
+  profile,
 }: {
   domain: string;
   username: string;
+  profile?: Profile;
 }): Promise<void> {
   // Remove any previous instance so the new one replaces it cleanly.
   document.querySelectorAll(BANNER_TAG).forEach((el) => el.remove());
@@ -52,7 +54,15 @@ export async function showSaveBanner({
     host.remove();
   };
 
-  render(<SaveBanner domain={domain} username={username} onClose={dismiss} />, mount);
+  render(
+    <SaveBanner
+      domain={domain}
+      username={username}
+      {...(profile !== undefined ? { profile } : {})}
+      onClose={dismiss}
+    />,
+    mount,
+  );
 
   // Auto-dismiss after 10s.
   setTimeout(dismiss, 10_000);
@@ -61,15 +71,32 @@ export async function showSaveBanner({
 function SaveBanner({
   domain,
   username,
+  profile,
   onClose,
 }: {
   domain: string;
   username: string;
+  profile?: Profile;
   onClose: () => void;
 }) {
   const save = async () => {
     try {
-      await send({ kind: "recordAccount", domain, username });
+      // Resolve the profile: prefer the one the badge passed in (frozen at
+      // fill time). If absent (e.g. legacy pending entry from a previous
+      // version), fall back to the site's current effective profile so
+      // recording still works.
+      let chosen = profile;
+      if (chosen === undefined) {
+        try {
+          const p = await send({ kind: "getProfile", domain });
+          chosen = p.profile;
+        } catch {
+          /* swallowed — recordAccount will fail below if profile is missing */
+        }
+      }
+      if (chosen !== undefined) {
+        await send({ kind: "recordAccount", domain, username, profile: chosen });
+      }
     } catch {
       /* swallowed — saving is nice-to-have */
     }
@@ -338,16 +365,22 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
     );
     setOpen(false);
     if (historyEnabled && !alreadySaved && currentEmail.length > 0) {
+      const profileSnapshot = profile ?? undefined;
       void send({
         kind: "setPendingSave",
         domain: status.domain,
         username: currentEmail,
+        ...(profileSnapshot !== undefined ? { profile: profileSnapshot } : {}),
       }).catch(() => {
         /* swallowed */
       });
-      void showSaveBanner({ domain: status.domain, username: currentEmail });
+      void showSaveBanner({
+        domain: status.domain,
+        username: currentEmail,
+        ...(profileSnapshot !== undefined ? { profile: profileSnapshot } : {}),
+      });
     }
-  }, [password, status, historyEnabled, saved, emailOverride]);
+  }, [password, status, historyEnabled, saved, emailOverride, profile]);
 
   const pickSaved = useCallback(
     (username: string) => {
@@ -567,6 +600,15 @@ function renderBody(props: BodyProps) {
     return <UnlockForm hasPin={status.hasPin} onSubmit={props.submitUnlock} />;
   }
 
+  if (status.kind === "idle" || status.kind === "loading") {
+    return (
+      <div class="badge__skeleton" aria-busy="true" aria-live="polite">
+        <div class="skeleton skeleton--row" />
+        <div class="skeleton skeleton--row" />
+        <div class="skeleton skeleton--row" />
+      </div>
+    );
+  }
   return <p class="badge__status">{statusMessage(status)}</p>;
 }
 

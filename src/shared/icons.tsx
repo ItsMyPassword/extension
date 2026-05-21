@@ -173,3 +173,13 @@ export function IconUpload({ size = 18, ...props }: IconProps) {
     </svg>
   );
 }
+
+export function IconMore({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <circle cx="12" cy="6" r="1.25" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="18" r="1.25" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}

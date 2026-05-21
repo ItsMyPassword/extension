@@ -109,17 +109,9 @@ export async function handleRequest(request: Request): Promise<AnyResponse> {
       case "recordAccount":
         return await handleRecordAccount(request.domain, request.username, request.profile);
       case "updateAccountProfile":
-        return await handleUpdateAccountProfile(
-          request.domain,
-          request.username,
-          request.profile,
-        );
+        return await handleUpdateAccountProfile(request.domain, request.username, request.profile);
       case "renameAccount":
-        return await handleRenameAccount(
-          request.domain,
-          request.oldUsername,
-          request.newUsername,
-        );
+        return await handleRenameAccount(request.domain, request.oldUsername, request.newUsername);
       case "deleteAccount":
         await handleDeleteAccount(request.domain, request.username);
         return { ok: true };
@@ -129,7 +121,7 @@ export async function handleRequest(request: Request): Promise<AnyResponse> {
         await updateState((s) => ({ ...s, faviconFallbackEnabled: request.enabled }));
         return { ok: true };
       case "setPendingSave":
-        await setPendingSave(request.domain, request.username);
+        await setPendingSave(request.domain, request.username, request.profile);
         return { ok: true };
       case "getPendingSave": {
         const entry = await getPendingSave(request.domain);

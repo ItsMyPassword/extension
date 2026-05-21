@@ -32,7 +32,7 @@ export type Request =
   | { kind: "deleteAccount"; domain: string; username: string }
   | { kind: "setFaviconFallbackEnabled"; enabled: boolean }
   | { kind: "setHistoryEnabled"; enabled: boolean }
-  | { kind: "setPendingSave"; domain: string; username: string }
+  | { kind: "setPendingSave"; domain: string; username: string; profile?: Profile }
   | { kind: "getPendingSave"; domain: string }
   | { kind: "clearPendingSave"; domain: string };
 
@@ -52,7 +52,7 @@ export type Response<T extends Request> = T extends { kind: "status" }
             ? GetStateResponse
             : T extends { kind: "listAccounts" }
               ? ListAccountsResponse
-              : T extends { kind: "recordAccount" }
+              : T extends { kind: "recordAccount" | "updateAccountProfile" | "renameAccount" }
                 ? RecordAccountResponse
                 : T extends { kind: "setHistoryEnabled" }
                   ? SetHistoryEnabledResponse
@@ -125,7 +125,7 @@ export interface SetHistoryEnabledResponse {
 
 export interface GetPendingSaveResponse {
   ok: true;
-  entry: { username: string } | null;
+  entry: { username: string; profile?: Profile } | null;
 }
 
 /** Discriminator for `chrome.runtime.onMessage` callbacks. */
