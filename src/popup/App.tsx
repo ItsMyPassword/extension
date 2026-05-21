@@ -79,6 +79,50 @@ async function bootstrap() {
       activeDomain.value = registrableDomain(tab.url);
     }
     activeEmail.value = "";
+    // Best-effort: read the username/email value from the active tab's
+    // login form so the generator input arrives pre-filled. Falls back
+    // silently on internal pages where executeScript is disallowed.
+    if (tab?.id !== undefined && activeDomain.value !== null) {
+      try {
+        const [result] = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+            const candidates = Array.from(
+              document.querySelectorAll<HTMLInputElement>(
+                'input[type="email"], input[type="text"], input[type="tel"], input:not([type])',
+              ),
+            ).filter((el) => el.offsetParent !== null && !el.disabled);
+            const hintRe = /user(name)?|login|email|e-?mail/i;
+            for (const el of candidates) {
+              const hint = (el.getAttribute("autocomplete") ?? "").toLowerCase();
+              if (hint === "username" || hint === "email") {
+                const v = el.value.trim();
+                if (v.length > 0) return v;
+              }
+            }
+            for (const el of candidates) {
+              const attrs = [
+                el.name,
+                el.id,
+                el.placeholder,
+                el.getAttribute("aria-label") ?? "",
+              ].join(" ");
+              if (hintRe.test(attrs)) {
+                const v = el.value.trim();
+                if (v.length > 0) return v;
+              }
+            }
+            return "";
+          },
+        });
+        const detected = result?.result;
+        if (typeof detected === "string" && detected.length > 0) {
+          activeEmail.value = detected;
+        }
+      } catch {
+        /* swallowed — page not scriptable */
+      }
+    }
     savedAccounts.value = [];
     allAccounts.value = [];
     if (historyEnabled.value && !status.locked) {

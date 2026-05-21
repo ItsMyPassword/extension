@@ -73,6 +73,20 @@ function SaveBanner({
     } catch {
       /* swallowed — saving is nice-to-have */
     }
+    try {
+      await send({ kind: "clearPendingSave", domain });
+    } catch {
+      /* swallowed */
+    }
+    onClose();
+  };
+
+  const dismiss = async () => {
+    try {
+      await send({ kind: "clearPendingSave", domain });
+    } catch {
+      /* swallowed */
+    }
     onClose();
   };
 
@@ -90,7 +104,7 @@ function SaveBanner({
         <button type="button" class="badge__btn badge__btn--primary" onClick={save}>
           {t("history_save_cta")}
         </button>
-        <button type="button" class="badge__btn" onClick={onClose}>
+        <button type="button" class="badge__btn" onClick={dismiss}>
           {t("history_save_dismiss")}
         </button>
       </div>
@@ -324,6 +338,13 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
     );
     setOpen(false);
     if (historyEnabled && !alreadySaved && currentEmail.length > 0) {
+      void send({
+        kind: "setPendingSave",
+        domain: status.domain,
+        username: currentEmail,
+      }).catch(() => {
+        /* swallowed */
+      });
       void showSaveBanner({ domain: status.domain, username: currentEmail });
     }
   }, [password, status, historyEnabled, saved, emailOverride]);
