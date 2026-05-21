@@ -19,6 +19,84 @@ import atomStyles from "../shared/atoms.css?inline";
 import badgeStyles from "./badge.css?inline";
 
 const HOST_TAG = "itsmypassword-badge";
+const BANNER_TAG = "itsmypassword-save-banner";
+
+/**
+ * Show a top-right toast asking the user to save a freshly-filled account.
+ * Independent of the per-field badge so it survives the panel closing and
+ * is positioned relative to the viewport (Dashlane-style).
+ */
+export async function showSaveBanner({
+  domain,
+  username,
+}: {
+  domain: string;
+  username: string;
+}): Promise<void> {
+  // Remove any previous instance so the new one replaces it cleanly.
+  document.querySelectorAll(BANNER_TAG).forEach((el) => el.remove());
+
+  const host = document.createElement(BANNER_TAG);
+  host.style.cssText =
+    "position: fixed; top: 16px; right: 16px; z-index: 2147483647; pointer-events: none;";
+  const shadow = host.attachShadow({ mode: "closed" });
+  const styleEl = document.createElement("style");
+  styleEl.textContent = `${atomStyles}\n${badgeStyles}`;
+  shadow.appendChild(styleEl);
+  const mount = document.createElement("div");
+  shadow.appendChild(mount);
+  document.documentElement.appendChild(host);
+
+  const dismiss = () => {
+    render(null, mount);
+    host.remove();
+  };
+
+  render(<SaveBanner domain={domain} username={username} onClose={dismiss} />, mount);
+
+  // Auto-dismiss after 10s.
+  setTimeout(dismiss, 10_000);
+}
+
+function SaveBanner({
+  domain,
+  username,
+  onClose,
+}: {
+  domain: string;
+  username: string;
+  onClose: () => void;
+}) {
+  const save = async () => {
+    try {
+      await send({ kind: "recordAccount", domain, username });
+    } catch {
+      /* swallowed — saving is nice-to-have */
+    }
+    onClose();
+  };
+
+  return (
+    <div class="save-banner" role="alertdialog" aria-label={t("history_save_prompt")}>
+      <div class="save-banner__head">
+        <Logo size={16} />
+        <span class="save-banner__title">{t("history_save_prompt")}</span>
+      </div>
+      <div class="save-banner__meta">
+        <span class="save-banner__domain">{domain}</span>
+        <span class="save-banner__username">{username}</span>
+      </div>
+      <div class="save-banner__actions">
+        <button type="button" class="badge__btn badge__btn--primary" onClick={save}>
+          {t("history_save_cta")}
+        </button>
+        <button type="button" class="badge__btn" onClick={onClose}>
+          {t("history_save_dismiss")}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export interface BadgeController {
   update: () => void;
@@ -139,7 +217,6 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
   const [emailOverride, setEmailOverride] = useState("");
   const [historyEnabled, setHistoryEnabled] = useState(false);
   const [saved, setSaved] = useState<AccountEntry[]>([]);
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   useEffect(() => {
     registerOpen(() => setOpen(true));
@@ -245,11 +322,10 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
     const alreadySaved = saved.some(
       (e) => e.username === currentEmail && e.domain === status.domain,
     );
-    if (historyEnabled && !alreadySaved && currentEmail.length > 0) {
-      setShowSavePrompt(true);
-      return;
-    }
     setOpen(false);
+    if (historyEnabled && !alreadySaved && currentEmail.length > 0) {
+      void showSaveBanner({ domain: status.domain, username: currentEmail });
+    }
   }, [password, status, historyEnabled, saved, emailOverride]);
 
   const pickSaved = useCallback(
@@ -259,27 +335,6 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
     },
     [refresh],
   );
-
-  const confirmSave = useCallback(async () => {
-    if (status.kind !== "ready") return;
-    const username = emailOverride.trim() || readUsername(password);
-    if (username.length === 0) {
-      setShowSavePrompt(false);
-      setOpen(false);
-      return;
-    }
-    try {
-      await send({
-        kind: "recordAccount",
-        domain: status.domain,
-        username,
-      });
-    } catch {
-      /* swallowed — saving is a nice-to-have */
-    }
-    setShowSavePrompt(false);
-    setOpen(false);
-  }, [status, emailOverride, password]);
 
   const copy = useCallback(async () => {
     if (status.kind !== "ready") return;
@@ -386,7 +441,7 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
             </div>
           </div>
 
-          {historyEnabled && saved.length > 0 && !showSavePrompt ? (
+          {historyEnabled && saved.length > 0 ? (
             <div class="badge__saved">
               <span class="badge__saved-label">{t("history_saved_for_site")}</span>
               <ul class="badge__saved-list">
@@ -405,44 +460,19 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
             </div>
           ) : null}
 
-          {showSavePrompt ? (
-            <div class="badge__save-prompt">
-              <span class="badge__status">{t("history_save_prompt")}</span>
-              <div class="badge__actions">
-                <button
-                  type="button"
-                  class="badge__btn badge__btn--primary"
-                  onClick={() => void confirmSave()}
-                >
-                  {t("history_save_cta")}
-                </button>
-                <button
-                  type="button"
-                  class="badge__btn"
-                  onClick={() => {
-                    setShowSavePrompt(false);
-                    setOpen(false);
-                  }}
-                >
-                  {t("history_save_dismiss")}
-                </button>
-              </div>
-            </div>
-          ) : (
-            renderBody({
-              status,
-              showSettings,
-              profile,
-              copied,
-              emailOverride,
-              setEmailOverride,
-              fill,
-              copy,
-              onProfileChange,
-              submitEmail,
-              submitUnlock,
-            })
-          )}
+          {renderBody({
+            status,
+            showSettings,
+            profile,
+            copied,
+            emailOverride,
+            setEmailOverride,
+            fill,
+            copy,
+            onProfileChange,
+            submitEmail,
+            submitUnlock,
+          })}
         </div>
       ) : null}
     </div>

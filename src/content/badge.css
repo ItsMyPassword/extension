@@ -325,10 +325,88 @@
   border-color: var(--color-line-strong);
 }
 
-.badge__save-prompt {
+/* Top-right Dashlane-style "Save this account?" banner. Rendered in its
+   own shadow-DOM host that sits at the viewport edge, independent of the
+   per-field badge. */
+.save-banner {
+  pointer-events: auto;
+  width: 320px;
+  padding: 14px;
+  background: var(--color-surface-elev);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  animation: save-banner-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes save-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.save-banner__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ink);
+}
+
+.save-banner__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.save-banner__meta {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  background: var(--color-surface-sunken);
+  border-radius: 10px;
+  border: 1px solid var(--color-line);
+  gap: 2px;
+  min-width: 0;
+}
+
+.save-banner__domain {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink-subtle);
+  text-transform: lowercase;
+  letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.save-banner__username {
+  font-size: 13px;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.save-banner__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.save-banner__actions > .badge__btn {
+  flex: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
