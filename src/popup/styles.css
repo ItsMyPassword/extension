@@ -1,6 +1,14 @@
 @import "../shared/theme.css";
 
+html,
 body {
-  width: 340px;
-  min-height: 200px;
+  width: 400px;
+  height: 600px;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }

@@ -9,6 +9,7 @@ import { SitesSection } from "../../options/components/SitesSection.js";
 import { DangerSection } from "../../options/components/DangerSection.js";
 import { HistorySection } from "../../options/components/HistorySection.js";
 import { AccountsSection } from "../../options/components/AccountsSection.js";
+import { FaviconSection } from "./FaviconSection.js";
 import { IconChevronRight } from "../../shared/icons.js";
 import { t } from "../../shared/i18n.js";
 import { SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
@@ -20,6 +21,7 @@ interface State {
   autoLockMinutes: number;
   hasPin: boolean;
   historyEnabled: boolean;
+  faviconFallbackEnabled: boolean;
   accountsCount: number;
   sites: Record<string, Profile>;
 }
@@ -49,6 +51,7 @@ export function SettingsScreen() {
         autoLockMinutes: res.autoLockMinutes,
         hasPin: res.hasPin,
         historyEnabled: res.historyEnabled,
+        faviconFallbackEnabled: res.faviconFallbackEnabled,
         accountsCount,
         sites: res.sites,
       });
@@ -160,6 +163,7 @@ export function SettingsScreen() {
               onChange={refresh}
             />
             <AccountsSection enabled={state.historyEnabled} />
+            <FaviconSection enabled={state.faviconFallbackEnabled} onChange={refresh} />
             <SitesSection sites={state.sites} onChange={refresh} />
             <DangerSection onChange={refresh} />
           </motion.div>

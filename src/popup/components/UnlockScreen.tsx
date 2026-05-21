@@ -5,6 +5,7 @@ import { Header } from "./Header.js";
 import { t } from "../../shared/i18n.js";
 import { POP_IN, SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import { busy, errorMessage, fingerprint, livePreview, screen } from "../state.js";
+import { loadVaultData } from "../vault.js";
 
 type Mode = "master" | "pin";
 
@@ -51,6 +52,7 @@ export function UnlockScreen({ hasPin }: Props) {
       try {
         const response = await send({ kind: "unlock", master });
         fingerprint.value = response.fingerprint;
+        await loadVaultData();
         screen.value = "main";
       } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : t("unlock_incorrect");
@@ -69,6 +71,7 @@ export function UnlockScreen({ hasPin }: Props) {
       try {
         const response = await send({ kind: "unlockWithPin", pin });
         fingerprint.value = response.fingerprint;
+        await loadVaultData();
         screen.value = "main";
       } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : t("unlock_incorrect_pin");

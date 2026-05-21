@@ -12,6 +12,7 @@ import {
   livePreview,
   screen,
 } from "../state.js";
+import { loadVaultData } from "../vault.js";
 
 const MIN_LENGTH = 12;
 
@@ -86,6 +87,7 @@ export function SetupScreen() {
             onClick={async () => {
               await send({ kind: "setHistoryEnabled", enabled: true });
               historyEnabled.value = true;
+              await loadVaultData();
               screen.value = "main";
             }}
           >
@@ -95,7 +97,8 @@ export function SetupScreen() {
             type="button"
             class="btn btn-ghost flex-1"
             whileTap={TAP_SCALE}
-            onClick={() => {
+            onClick={async () => {
+              await loadVaultData();
               screen.value = "main";
             }}
           >

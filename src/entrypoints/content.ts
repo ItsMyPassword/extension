@@ -64,7 +64,11 @@ export default defineContentScript({
         send({ kind: "getPendingSave", domain: currentDomain })
           .then((res) => {
             if (res.entry !== null) {
-              void showSaveBanner({ domain: currentDomain, username: res.entry.username });
+              void showSaveBanner({
+                domain: currentDomain,
+                username: res.entry.username,
+                ...(res.entry.profile !== undefined ? { profile: res.entry.profile } : {}),
+              });
             }
           })
           .catch(() => {

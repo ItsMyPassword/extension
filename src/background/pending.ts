@@ -7,11 +7,14 @@
  * navigation. Entries auto-expire after a short TTL — we don't want to
  * still nag the user about a fill from twenty minutes ago.
  */
+import type { Profile } from "../shared/types.js";
+
 const PENDING_KEY = "pendingSaves";
 const TTL_MS = 5 * 60 * 1000;
 
 interface PendingRecord {
   username: string;
+  profile?: Profile;
   ts: number;
 }
 
@@ -27,13 +30,23 @@ async function writeStore(store: Store): Promise<void> {
   await chrome.storage.session.set({ [PENDING_KEY]: store });
 }
 
-export async function setPendingSave(domain: string, username: string): Promise<void> {
+export async function setPendingSave(
+  domain: string,
+  username: string,
+  profile?: Profile,
+): Promise<void> {
   const store = await readStore();
-  store[domain] = { username, ts: Date.now() };
+  store[domain] = {
+    username,
+    ts: Date.now(),
+    ...(profile !== undefined ? { profile } : {}),
+  };
   await writeStore(store);
 }
 
-export async function getPendingSave(domain: string): Promise<{ username: string } | null> {
+export async function getPendingSave(
+  domain: string,
+): Promise<{ username: string; profile?: Profile } | null> {
   const store = await readStore();
   const entry = store[domain];
   if (entry === undefined) return null;
@@ -42,7 +55,10 @@ export async function getPendingSave(domain: string): Promise<{ username: string
     await writeStore(store);
     return null;
   }
-  return { username: entry.username };
+  return {
+    username: entry.username,
+    ...(entry.profile !== undefined ? { profile: entry.profile } : {}),
+  };
 }
 
 export async function clearPendingSave(domain: string): Promise<void> {

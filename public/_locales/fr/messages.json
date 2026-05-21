@@ -170,5 +170,30 @@
   "history_delete_aria": { "message": "Supprimer le compte" },
 
   "main_add_new": { "message": "Nouveau compte" },
-  "main_back_to_list": { "message": "Retour aux comptes" }
+  "main_back_to_list": { "message": "Retour aux comptes" },
+
+  "row_menu_aria": { "message": "Plus d'actions" },
+  "row_menu_copy_username": { "message": "Copier l'identifiant" },
+  "row_menu_copy_password": { "message": "Copier le mot de passe" },
+  "row_menu_open": { "message": "Ouvrir" },
+
+  "detail_missing": { "message": "Compte introuvable." },
+  "detail_password_label": { "message": "Mot de passe" },
+  "detail_profile_section": { "message": "Paramètres de génération" },
+  "detail_profile_hint": {
+    "message": "Ces paramètres sont enregistrés sur ce compte uniquement. Les modifier n'affecte pas les autres comptes du même site."
+  },
+  "detail_last_used": {
+    "message": "Dernière utilisation $WHEN$",
+    "placeholders": { "when": { "content": "$1" } }
+  },
+  "detail_delete_cta": { "message": "Supprimer ce compte" },
+  "detail_delete_confirm": { "message": "Supprimer définitivement ce compte enregistré ?" },
+  "detail_rename_failed": { "message": "Impossible de renommer ce compte." },
+
+  "favicon_section_title": { "message": "Icônes des sites" },
+  "favicon_section_hint": {
+    "message": "Quand le navigateur n'a pas l'icône d'un site en cache, ItsMyPassword peut la demander au service public de Google. Désactive pour rester 100% local (placeholder à base d'initiales)."
+  },
+  "favicon_toggle_label": { "message": "Récupérer les icônes manquantes via Google" }
 }

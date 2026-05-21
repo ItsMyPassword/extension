@@ -112,13 +112,25 @@ export function MainScreen() {
 
   const saveToHistory = useCallback(async () => {
     if (activeDomain.value === null || activeEmail.value.trim().length === 0) return;
+    // The profile used for the generation must be persisted alongside the
+    // entry, so the password recomputes identically forever — independent
+    // of any later changes to the per-site or default profile.
+    let chosenProfile: Profile | null = profile;
+    if (chosenProfile === null) {
+      try {
+        const p = await send({ kind: "getProfile", domain: activeDomain.value });
+        chosenProfile = p.profile;
+      } catch {
+        return;
+      }
+    }
     try {
       const res = await send({
         kind: "recordAccount",
         domain: activeDomain.value,
         username: activeEmail.value.trim(),
+        profile: chosenProfile,
       });
-      // Optimistically prepend to the in-memory list.
       const exists = allAccounts.value.some(
         (e) => e.domain === res.entry.domain && e.username === res.entry.username,
       );
@@ -131,7 +143,7 @@ export function MainScreen() {
     } catch {
       /* swallowed */
     }
-  }, []);
+  }, [profile]);
 
   const onLock = useCallback(async () => {
     await send({ kind: "lock" });
