@@ -7,6 +7,7 @@ import { PinSection } from "./components/PinSection.js";
 import { DangerSection } from "./components/DangerSection.js";
 import { ProfileEditor } from "../shared/ProfileEditor.js";
 import { Logo } from "../shared/Logo.js";
+import { DotGrid } from "../shared/DotGrid.js";
 import { t } from "../shared/i18n.js";
 import { SOFT_SPRING } from "../shared/motion.js";
 import type { Profile } from "../shared/types.js";
@@ -43,31 +44,39 @@ export function App() {
 
   if (error !== null) {
     return (
-      <main class="max-w-3xl mx-auto px-6 pt-12 pb-16 flex flex-col gap-8">
+      <>
+        <DotGrid />
+        <main class="relative z-10 max-w-3xl mx-auto px-6 pt-12 pb-16 flex flex-col gap-8">
         <PageHeader />
         <div class="callout callout-danger" role="alert">
           {error}
         </div>
-      </main>
+        </main>
+      </>
     );
   }
 
   if (state === null) {
     return (
-      <main class="max-w-3xl mx-auto px-6 pt-12 pb-16 flex flex-col gap-8">
+      <>
+        <DotGrid />
+        <main class="relative z-10 max-w-3xl mx-auto px-6 pt-12 pb-16 flex flex-col gap-8">
         <PageHeader />
         <div class="card">
           <div class="skeleton h-5 w-2/5" />
           <div class="skeleton h-3.5 w-3/4" />
           <div class="skeleton h-16" />
         </div>
-      </main>
+        </main>
+      </>
     );
   }
 
   return (
+    <>
+    <DotGrid />
     <motion.main
-      class="max-w-3xl mx-auto px-6 pt-12 pb-16 flex flex-col gap-8"
+      class="relative z-10 max-w-3xl mx-auto px-6 pt-12 pb-16 flex flex-col gap-8"
       initial="initial"
       animate="animate"
       variants={{
@@ -113,6 +122,7 @@ export function App() {
 
       <DangerSection onChange={refresh} />
     </motion.main>
+    </>
   );
 }
 
