@@ -7,6 +7,8 @@ import { ProfileEditor } from "../../shared/ProfileEditor.js";
 import { PinSection } from "../../options/components/PinSection.js";
 import { SitesSection } from "../../options/components/SitesSection.js";
 import { DangerSection } from "../../options/components/DangerSection.js";
+import { HistorySection } from "../../options/components/HistorySection.js";
+import { AccountsSection } from "../../options/components/AccountsSection.js";
 import { IconChevronRight } from "../../shared/icons.js";
 import { t } from "../../shared/i18n.js";
 import { SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
@@ -17,6 +19,8 @@ interface State {
   defaultProfile: Profile;
   autoLockMinutes: number;
   hasPin: boolean;
+  historyEnabled: boolean;
+  accountsCount: number;
   sites: Record<string, Profile>;
 }
 
@@ -31,10 +35,21 @@ export function SettingsScreen() {
   const refresh = async () => {
     try {
       const res = await send({ kind: "getState" });
+      let accountsCount = 0;
+      if (res.historyEnabled) {
+        try {
+          const list = await send({ kind: "listAccounts" });
+          accountsCount = list.entries.length;
+        } catch {
+          accountsCount = 0;
+        }
+      }
       setState({
         defaultProfile: res.defaultProfile,
         autoLockMinutes: res.autoLockMinutes,
         hasPin: res.hasPin,
+        historyEnabled: res.historyEnabled,
+        accountsCount,
         sites: res.sites,
       });
       setError(null);
@@ -139,6 +154,12 @@ export function SettingsScreen() {
             </CompactSection>
 
             <PinSection hasPin={state.hasPin} onChange={refresh} />
+            <HistorySection
+              enabled={state.historyEnabled}
+              hasEntries={state.accountsCount > 0}
+              onChange={refresh}
+            />
+            <AccountsSection enabled={state.historyEnabled} />
             <SitesSection sites={state.sites} onChange={refresh} />
             <DangerSection onChange={refresh} />
           </motion.div>
