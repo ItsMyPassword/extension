@@ -6,8 +6,10 @@
  * the master password stay inside the background service worker.
  */
 import { defineContentScript } from "wxt/utils/define-content-script";
-import { attachBadge, type BadgeController } from "../content/Badge.js";
+import { attachBadge, showSaveBanner, type BadgeController } from "../content/Badge.js";
 import { findPasswordFields } from "../content/detect.js";
+import { send } from "../content/messaging.js";
+import { registrableDomain } from "../shared/domain.js";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
@@ -52,6 +54,24 @@ export default defineContentScript({
     };
 
     scan();
+
+    // After a successful Fill the user may navigate (form submit) before
+    // dismissing the save banner. The background keeps a short-TTL marker;
+    // if one exists for this domain on page load, re-surface the banner.
+    if (window === window.top) {
+      const currentDomain = registrableDomain(window.location.href);
+      if (currentDomain !== null) {
+        send({ kind: "getPendingSave", domain: currentDomain })
+          .then((res) => {
+            if (res.entry !== null) {
+              void showSaveBanner({ domain: currentDomain, username: res.entry.username });
+            }
+          })
+          .catch(() => {
+            /* swallowed */
+          });
+      }
+    }
 
     const observer = new MutationObserver((mutations) => {
       let needsScan = false;

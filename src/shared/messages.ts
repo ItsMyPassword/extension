@@ -28,7 +28,10 @@ export type Request =
   | { kind: "listAccounts"; domain?: string }
   | { kind: "recordAccount"; domain: string; username: string }
   | { kind: "deleteAccount"; domain: string; username: string }
-  | { kind: "setHistoryEnabled"; enabled: boolean };
+  | { kind: "setHistoryEnabled"; enabled: boolean }
+  | { kind: "setPendingSave"; domain: string; username: string }
+  | { kind: "getPendingSave"; domain: string }
+  | { kind: "clearPendingSave"; domain: string };
 
 // All responses share the same shape on success; we use a small set of
 // payload types and let TS pick the right one via the discriminator.
@@ -50,7 +53,9 @@ export type Response<T extends Request> = T extends { kind: "status" }
                 ? RecordAccountResponse
                 : T extends { kind: "setHistoryEnabled" }
                   ? SetHistoryEnabledResponse
-                  : OkResponse;
+                  : T extends { kind: "getPendingSave" }
+                    ? GetPendingSaveResponse
+                    : OkResponse;
 
 export interface OkResponse {
   ok: true;
@@ -112,6 +117,11 @@ export interface RecordAccountResponse {
 export interface SetHistoryEnabledResponse {
   ok: true;
   cleared: number;
+}
+
+export interface GetPendingSaveResponse {
+  ok: true;
+  entry: { username: string } | null;
 }
 
 /** Discriminator for `chrome.runtime.onMessage` callbacks. */

@@ -12,12 +12,14 @@ import {
   formatFingerprint,
 } from "./crypto/index.js";
 import { deleteAccount, listAccounts, recordAccount, wipeAccounts } from "./accounts.js";
+import { clearPendingSave, getPendingSave, setPendingSave } from "./pending.js";
 import { effectiveProfile, loadState, updateState, wipeAll, type StoredState } from "./storage.js";
 import { lock, readMaster, status as sessionStatus, unlock } from "./session.js";
 import type {
   ErrorResponse,
   FingerprintResponse,
   GenerateResponse,
+  GetPendingSaveResponse,
   GetProfileResponse,
   GetStateResponse,
   ListAccountsResponse,
@@ -41,7 +43,8 @@ type AnyResponse =
   | GetStateResponse
   | ListAccountsResponse
   | RecordAccountResponse
-  | SetHistoryEnabledResponse;
+  | SetHistoryEnabledResponse
+  | GetPendingSaveResponse;
 
 export async function handleRequest(request: Request): Promise<AnyResponse> {
   try {
@@ -102,6 +105,16 @@ export async function handleRequest(request: Request): Promise<AnyResponse> {
         return { ok: true };
       case "setHistoryEnabled":
         return await handleSetHistoryEnabled(request.enabled);
+      case "setPendingSave":
+        await setPendingSave(request.domain, request.username);
+        return { ok: true };
+      case "getPendingSave": {
+        const entry = await getPendingSave(request.domain);
+        return { ok: true, entry };
+      }
+      case "clearPendingSave":
+        await clearPendingSave(request.domain);
+        return { ok: true };
       case "wipe":
         await wipeAll();
         await wipeAccounts();
