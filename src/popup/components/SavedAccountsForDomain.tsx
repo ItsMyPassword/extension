@@ -21,18 +21,12 @@ export function SavedAccountsForDomain({ onPick }: Props) {
     if (entries.length === 1 && activeEmail.value.trim().length === 0) {
       onPick(entries[0]!.username);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries.length]);
 
   if (entries.length === 0) return null;
 
   return (
-    <motion.div
-      class="flex flex-col gap-2"
-      variants={POP_IN}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div class="flex flex-col gap-2" variants={POP_IN} initial="initial" animate="animate">
       <span class="field-label">{t("history_saved_for_site")}</span>
       <ul class="flex flex-col gap-1.5 list-none p-0 m-0">
         {entries.map((entry) => (

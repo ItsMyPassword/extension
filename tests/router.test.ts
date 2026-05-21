@@ -227,6 +227,7 @@ describe("router — account history", () => {
     expect(rec).toMatchObject({ ok: true, entry: { domain: "example.com" } });
     const list = await handleRequest({ kind: "listAccounts", domain: "example.com" });
     if (list.ok === false) throw new Error(list.error);
+    if (!("entries" in list)) throw new Error("unexpected response shape");
     expect(list.entries).toHaveLength(1);
     expect(list.entries[0]).toMatchObject({ username: "alice@x.com" });
   });
@@ -243,6 +244,7 @@ describe("router — account history", () => {
     expect(off).toMatchObject({ ok: true });
     const list = await handleRequest({ kind: "listAccounts" });
     if (list.ok === false) throw new Error(list.error);
+    if (!("entries" in list)) throw new Error("unexpected response shape");
     expect(list.entries).toEqual([]);
   });
 

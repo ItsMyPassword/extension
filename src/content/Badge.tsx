@@ -428,19 +428,21 @@ function Badge({ password, registerOpen, registerClose, registerUpdate }: BadgeP
                 </button>
               </div>
             </div>
-          ) : renderBody({
-            status,
-            showSettings,
-            profile,
-            copied,
-            emailOverride,
-            setEmailOverride,
-            fill,
-            copy,
-            onProfileChange,
-            submitEmail,
-            submitUnlock,
-          })}
+          ) : (
+            renderBody({
+              status,
+              showSettings,
+              profile,
+              copied,
+              emailOverride,
+              setEmailOverride,
+              fill,
+              copy,
+              onProfileChange,
+              submitEmail,
+              submitUnlock,
+            })
+          )}
         </div>
       ) : null}
     </div>

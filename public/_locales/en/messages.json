@@ -145,13 +145,19 @@
   "badge_customize": { "message": "Customise" },
 
   "history_section_title": { "message": "Saved accounts" },
-  "history_section_hint": { "message": "Keep an encrypted list of the accounts you have created on each site. Username and site only — passwords are never stored." },
+  "history_section_hint": {
+    "message": "Keep an encrypted list of the accounts you have created on each site. Username and site only — passwords are never stored."
+  },
   "history_toggle_label": { "message": "Remember the accounts I create" },
   "history_disable_confirm_title": { "message": "Disable account history?" },
-  "history_disable_confirm_body": { "message": "This will permanently delete your saved accounts. This cannot be undone." },
+  "history_disable_confirm_body": {
+    "message": "This will permanently delete your saved accounts. This cannot be undone."
+  },
   "history_disable_confirm_cta": { "message": "Disable and delete" },
   "history_setup_title": { "message": "Remember your accounts?" },
-  "history_setup_body": { "message": "When you fill a password through the badge, ItsMyPassword can save the site and username (never the password) so you can find your accounts later. Encrypted with your master password." },
+  "history_setup_body": {
+    "message": "When you fill a password through the badge, ItsMyPassword can save the site and username (never the password) so you can find your accounts later. Encrypted with your master password."
+  },
   "history_setup_enable": { "message": "Enable history" },
   "history_setup_skip": { "message": "Not now" },
   "history_save_prompt": { "message": "Save this account?" },

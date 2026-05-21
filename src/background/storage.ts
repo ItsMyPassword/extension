@@ -55,8 +55,11 @@ export async function loadState(): Promise<StoredState> {
   if (!raw || typeof raw !== "object") {
     return cloneDefault();
   }
-  const state = raw as Partial<StoredState> & { schemaVersion?: number };
-  if (state.schemaVersion !== 1 && state.schemaVersion !== SCHEMA_VERSION) {
+  const state = raw as Partial<Omit<StoredState, "schemaVersion">> & {
+    schemaVersion?: number;
+  };
+  const rawSchema = state.schemaVersion;
+  if (rawSchema !== 1 && rawSchema !== SCHEMA_VERSION) {
     return cloneDefault();
   }
   const migrated: StoredState = {
@@ -68,7 +71,7 @@ export async function loadState(): Promise<StoredState> {
     ...(state.pin !== undefined ? { pin: state.pin } : {}),
     sites: state.sites ?? {},
   };
-  if (state.schemaVersion === 1) {
+  if (rawSchema === 1) {
     await saveState(migrated);
   }
   return migrated;

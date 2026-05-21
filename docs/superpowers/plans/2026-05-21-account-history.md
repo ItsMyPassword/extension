@@ -47,6 +47,7 @@
 ## Task 1: Type for `AccountEntry`
 
 **Files:**
+
 - Modify: `src/shared/types.ts`
 
 - [ ] **Step 1: Add the type at the end of `src/shared/types.ts`**
@@ -79,6 +80,7 @@ git commit -m "feat(types): add AccountEntry interface"
 ## Task 2: Extend the message contract
 
 **Files:**
+
 - Modify: `src/shared/messages.ts`
 
 - [ ] **Step 1: Import the new type and add the four request variants**
@@ -192,6 +194,7 @@ git commit -m "feat(messages): add account-history request/response variants"
 ## Task 3: Persistent state migration to v2
 
 **Files:**
+
 - Modify: `src/background/storage.ts`
 - Modify: `tests/storage.test.ts`
 
@@ -303,6 +306,7 @@ git commit -m "feat(storage): add historyEnabled flag and v1->v2 migration"
 ## Task 4: Extract a shared PBKDF2 → AES-GCM helper
 
 **Files:**
+
 - Modify: `src/background/crypto/pin.ts`
 - Modify: `src/background/crypto/index.ts`
 
@@ -374,6 +378,7 @@ git commit -m "refactor(crypto): expose deriveAesGcmKey for reuse"
 ## Task 5: Accounts module — types and storage shape (TDD)
 
 **Files:**
+
 - Create: `src/background/accounts.ts`
 - Create: `tests/accounts.test.ts`
 
@@ -558,6 +563,7 @@ git commit -m "feat(accounts): encrypted CRUD for saved (domain, username) pairs
 ## Task 6: Accounts module — dedup, delete, wipe
 
 **Files:**
+
 - Modify: `tests/accounts.test.ts`
 
 - [ ] **Step 1: Add the remaining failing tests**
@@ -619,6 +625,7 @@ git commit -m "test(accounts): dedup, filter, delete, and wipe coverage"
 ## Task 7: Router wiring for the four new messages
 
 **Files:**
+
 - Modify: `src/background/router.ts`
 - Modify: `tests/router.test.ts`
 
@@ -680,12 +687,7 @@ Expected: FAIL — unhandled `kind` values.
 Add imports at the top:
 
 ```ts
-import {
-  deleteAccount,
-  listAccounts,
-  recordAccount,
-  wipeAccounts,
-} from "./accounts.js";
+import { deleteAccount, listAccounts, recordAccount, wipeAccounts } from "./accounts.js";
 import type {
   ListAccountsResponse,
   RecordAccountResponse,
@@ -805,6 +807,7 @@ git commit -m "feat(router): wire account-history message handlers"
 ## Task 8: i18n strings
 
 **Files:**
+
 - Modify: `src/shared/i18n.ts`
 - Modify: `public/_locales/en/messages.json`
 - Modify: `public/_locales/fr/messages.json`
@@ -876,6 +879,7 @@ git commit -m "i18n: add account-history strings (EN + FR)"
 ## Task 9: Popup state — `savedAccounts` signal
 
 **Files:**
+
 - Modify: `src/popup/state.ts`
 
 - [ ] **Step 1: Add the signal**
@@ -904,6 +908,7 @@ git commit -m "feat(popup): savedAccounts signal"
 ## Task 10: Popup bootstrap loads `historyEnabled` + saved accounts
 
 **Files:**
+
 - Modify: `src/popup/App.tsx`
 
 - [ ] **Step 1: Update the `bootstrap()` function**
@@ -950,6 +955,7 @@ git commit -m "feat(popup): preload saved accounts on bootstrap"
 ## Task 11: `SavedAccountsForDomain` component
 
 **Files:**
+
 - Create: `src/popup/components/SavedAccountsForDomain.tsx`
 
 - [ ] **Step 1: Create the component**
@@ -984,12 +990,7 @@ export function SavedAccountsForDomain({ onPick }: Props) {
   if (entries.length === 0) return null;
 
   return (
-    <motion.div
-      class="flex flex-col gap-2"
-      variants={POP_IN}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div class="flex flex-col gap-2" variants={POP_IN} initial="initial" animate="animate">
       <span class="field-label">{t("history_saved_for_site")}</span>
       <ul class="flex flex-col gap-1.5 list-none p-0 m-0">
         {entries.map((entry) => (
@@ -1037,6 +1038,7 @@ git commit -m "feat(popup): SavedAccountsForDomain block"
 ## Task 12: Mount the block in `MainScreen`
 
 **Files:**
+
 - Modify: `src/popup/components/MainScreen.tsx`
 
 - [ ] **Step 1: Import and render**
@@ -1063,9 +1065,11 @@ const pickSaved = useCallback(
 Render the block just above the existing `<label>` username row, only when relevant:
 
 ```tsx
-{historyEnabled.value && savedAccounts.value.length > 0 ? (
-  <SavedAccountsForDomain onPick={pickSaved} />
-) : null}
+{
+  historyEnabled.value && savedAccounts.value.length > 0 ? (
+    <SavedAccountsForDomain onPick={pickSaved} />
+  ) : null;
+}
 ```
 
 - [ ] **Step 2: Build**
@@ -1085,6 +1089,7 @@ git commit -m "feat(popup): show saved accounts above username input"
 ## Task 13: Setup wizard — opt-in step
 
 **Files:**
+
 - Modify: `src/popup/components/SetupScreen.tsx`
 
 - [ ] **Step 1: Add a second step after the master is created**
@@ -1111,9 +1116,7 @@ if (step === "history") {
       transition={SOFT_SPRING}
     >
       <Header subtitle={t("history_setup_title")} />
-      <p class="text-(--color-ink-muted) text-sm leading-relaxed">
-        {t("history_setup_body")}
-      </p>
+      <p class="text-(--color-ink-muted) text-sm leading-relaxed">{t("history_setup_body")}</p>
       <div class="flex gap-2">
         <motion.button
           type="button"
@@ -1159,6 +1162,7 @@ git commit -m "feat(setup): opt-in account-history step in the wizard"
 ## Task 14: Options — `HistorySection` (toggle + danger confirm)
 
 **Files:**
+
 - Create: `src/options/components/HistorySection.tsx`
 - Modify: `src/options/App.tsx`
 
@@ -1327,6 +1331,7 @@ git commit -m "feat(options): history toggle with destructive disable confirm"
 ## Task 15: Options — `AccountsSection` (searchable table + delete)
 
 **Files:**
+
 - Create: `src/options/components/AccountsSection.tsx`
 - Modify: `src/options/App.tsx`
 
@@ -1410,9 +1415,7 @@ export function AccountsSection({ enabled }: Props) {
                   <span class="text-sm font-medium text-(--color-ink) truncate">
                     {entry.domain}
                   </span>
-                  <span class="text-xs text-(--color-ink-muted) truncate">
-                    {entry.username}
-                  </span>
+                  <span class="text-xs text-(--color-ink-muted) truncate">{entry.username}</span>
                 </div>
                 <motion.button
                   type="button"
@@ -1471,6 +1474,7 @@ git commit -m "feat(options): searchable accounts table with per-row delete"
 ## Task 16: Badge — saved-accounts list at top of panel
 
 **Files:**
+
 - Modify: `src/content/Badge.tsx`
 - Modify: `src/content/badge.css`
 
@@ -1502,27 +1506,29 @@ import type { AccountEntry, Profile } from "../shared/types.js";
 Inside the panel body, just under the header and before any other status content:
 
 ```tsx
-{saved.length > 0 ? (
-  <div class="badge__saved">
-    <span class="badge__saved-label">{t("history_saved_for_site")}</span>
-    <ul class="badge__saved-list">
-      {saved.map((entry) => (
-        <li key={entry.username}>
-          <button
-            type="button"
-            class="badge__saved-row"
-            onClick={() => {
-              setEmailOverride(entry.username);
-              void refresh({ email: entry.username });
-            }}
-          >
-            {entry.username}
-          </button>
-        </li>
-      ))}
-    </ul>
-  </div>
-) : null}
+{
+  saved.length > 0 ? (
+    <div class="badge__saved">
+      <span class="badge__saved-label">{t("history_saved_for_site")}</span>
+      <ul class="badge__saved-list">
+        {saved.map((entry) => (
+          <li key={entry.username}>
+            <button
+              type="button"
+              class="badge__saved-row"
+              onClick={() => {
+                setEmailOverride(entry.username);
+                void refresh({ email: entry.username });
+              }}
+            >
+              {entry.username}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
+}
 ```
 
 - [ ] **Step 3: Add styles in `badge.css`**
@@ -1592,6 +1598,7 @@ git commit -m "feat(badge): list saved accounts at the top of the panel"
 ## Task 17: Badge — Save-this-account toast after Fill
 
 **Files:**
+
 - Modify: `src/content/Badge.tsx`
 
 - [ ] **Step 1: Track the toast state**
@@ -1608,9 +1615,7 @@ In the `fill` callback, after the dispatched `change` event and before `setOpen(
 
 ```ts
 const currentEmail = emailOverride.trim() || readUsername(password);
-const alreadySaved = saved.some(
-  (e) => e.username === currentEmail && e.domain === status.domain,
-);
+const alreadySaved = saved.some((e) => e.username === currentEmail && e.domain === status.domain);
 const { historyEnabled } = await send({ kind: "getState" });
 if (historyEnabled && !alreadySaved && currentEmail.length > 0) {
   setShowSavePrompt(true);
@@ -1624,40 +1629,42 @@ setOpen(false);
 Inside the panel body, when `showSavePrompt` is true (replacing the normal action row):
 
 ```tsx
-{showSavePrompt ? (
-  <div class="badge__save-prompt">
-    <span class="badge__status">{t("history_save_prompt")}</span>
-    <div class="badge__actions">
-      <button
-        type="button"
-        class="badge__btn badge__btn--primary"
-        onClick={async () => {
-          if (status.kind !== "ready") return;
-          const username = emailOverride.trim() || readUsername(password);
-          await send({
-            kind: "recordAccount",
-            domain: status.domain,
-            username,
-          });
-          setShowSavePrompt(false);
-          setOpen(false);
-        }}
-      >
-        {t("history_save_cta")}
-      </button>
-      <button
-        type="button"
-        class="badge__btn"
-        onClick={() => {
-          setShowSavePrompt(false);
-          setOpen(false);
-        }}
-      >
-        {t("history_save_dismiss")}
-      </button>
+{
+  showSavePrompt ? (
+    <div class="badge__save-prompt">
+      <span class="badge__status">{t("history_save_prompt")}</span>
+      <div class="badge__actions">
+        <button
+          type="button"
+          class="badge__btn badge__btn--primary"
+          onClick={async () => {
+            if (status.kind !== "ready") return;
+            const username = emailOverride.trim() || readUsername(password);
+            await send({
+              kind: "recordAccount",
+              domain: status.domain,
+              username,
+            });
+            setShowSavePrompt(false);
+            setOpen(false);
+          }}
+        >
+          {t("history_save_cta")}
+        </button>
+        <button
+          type="button"
+          class="badge__btn"
+          onClick={() => {
+            setShowSavePrompt(false);
+            setOpen(false);
+          }}
+        >
+          {t("history_save_dismiss")}
+        </button>
+      </div>
     </div>
-  </div>
-) : null}
+  ) : null;
+}
 ```
 
 - [ ] **Step 4: Build**
@@ -1677,6 +1684,7 @@ git commit -m "feat(badge): prompt to save the account after a successful fill"
 ## Task 18: Privacy doc update
 
 **Files:**
+
 - Modify: `docs/PRIVACY.md`
 
 - [ ] **Step 1: Append a section**
@@ -1706,6 +1714,7 @@ git commit -m "docs(privacy): document the optional encrypted accounts list"
 ## Task 19: End-to-end happy path
 
 **Files:**
+
 - Create: `tests/e2e/account-history.spec.ts`
 
 - [ ] **Step 1: Author the scenario, modelled on existing e2e tests**
@@ -1722,7 +1731,10 @@ test("opt-in history pre-fills the popup on a return visit", async ({
 }) => {
   // Setup with master password
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
-  await page.getByLabel(/master/i).first().fill("correct horse battery staple");
+  await page
+    .getByLabel(/master/i)
+    .first()
+    .fill("correct horse battery staple");
   await page.getByLabel(/confirm/i).fill("correct horse battery staple");
   await page.getByRole("button", { name: /create/i }).click();
 

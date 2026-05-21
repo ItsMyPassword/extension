@@ -11,12 +11,7 @@ import {
   fingerprintMaster,
   formatFingerprint,
 } from "./crypto/index.js";
-import {
-  deleteAccount,
-  listAccounts,
-  recordAccount,
-  wipeAccounts,
-} from "./accounts.js";
+import { deleteAccount, listAccounts, recordAccount, wipeAccounts } from "./accounts.js";
 import { effectiveProfile, loadState, updateState, wipeAll, type StoredState } from "./storage.js";
 import { lock, readMaster, status as sessionStatus, unlock } from "./session.js";
 import type {

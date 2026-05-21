@@ -29,9 +29,9 @@ password is persisted, the username is just an identifier.
 
 ```ts
 interface AccountEntry {
-  domain: string;     // registrable domain (same normalisation as profiles)
-  username: string;   // email or identifier — used as the lookup key
-  createdAt: number;  // epoch ms
+  domain: string; // registrable domain (same normalisation as profiles)
+  username: string; // email or identifier — used as the lookup key
+  createdAt: number; // epoch ms
   lastUsedAt: number; // epoch ms; bumped on every Fill / re-use
 }
 ```
@@ -53,7 +53,7 @@ A new boolean lives in the plain (non-secret) state:
 ```ts
 interface State {
   /* …existing fields… */
-  historyEnabled: boolean;  // default false
+  historyEnabled: boolean; // default false
 }
 ```
 

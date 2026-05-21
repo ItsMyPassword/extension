@@ -77,9 +77,7 @@ export function SetupScreen() {
         transition={SOFT_SPRING}
       >
         <Header subtitle={t("history_setup_title")} />
-        <p class="text-(--color-ink-muted) text-sm leading-relaxed">
-          {t("history_setup_body")}
-        </p>
+        <p class="text-(--color-ink-muted) text-sm leading-relaxed">{t("history_setup_body")}</p>
         <div class="flex gap-2">
           <motion.button
             type="button"

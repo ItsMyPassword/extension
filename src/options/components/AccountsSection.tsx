@@ -29,7 +29,6 @@ export function AccountsSection({ enabled }: Props) {
 
   useEffect(() => {
     void refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
   const filtered = useMemo(() => {
@@ -76,9 +75,7 @@ export function AccountsSection({ enabled }: Props) {
                   <span class="text-sm font-medium text-(--color-ink) truncate">
                     {entry.domain}
                   </span>
-                  <span class="text-xs text-(--color-ink-muted) truncate">
-                    {entry.username}
-                  </span>
+                  <span class="text-xs text-(--color-ink-muted) truncate">{entry.username}</span>
                 </div>
                 <motion.button
                   type="button"

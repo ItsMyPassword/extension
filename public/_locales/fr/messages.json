@@ -145,13 +145,19 @@
   "badge_customize": { "message": "Personnaliser" },
 
   "history_section_title": { "message": "Comptes enregistrés" },
-  "history_section_hint": { "message": "Conserve une liste chiffrée des comptes que tu as créés sur chaque site. Identifiant et site uniquement — les mots de passe ne sont jamais stockés." },
+  "history_section_hint": {
+    "message": "Conserve une liste chiffrée des comptes que tu as créés sur chaque site. Identifiant et site uniquement — les mots de passe ne sont jamais stockés."
+  },
   "history_toggle_label": { "message": "Mémoriser les comptes que je crée" },
   "history_disable_confirm_title": { "message": "Désactiver l'historique des comptes ?" },
-  "history_disable_confirm_body": { "message": "Cela supprimera définitivement tes comptes enregistrés. Cette action est irréversible." },
+  "history_disable_confirm_body": {
+    "message": "Cela supprimera définitivement tes comptes enregistrés. Cette action est irréversible."
+  },
   "history_disable_confirm_cta": { "message": "Désactiver et supprimer" },
   "history_setup_title": { "message": "Mémoriser tes comptes ?" },
-  "history_setup_body": { "message": "Quand tu remplis un mot de passe via le badge, ItsMyPassword peut enregistrer le site et l'identifiant (jamais le mot de passe) pour t'aider à retrouver tes comptes. Chiffré avec ton mot de passe maître." },
+  "history_setup_body": {
+    "message": "Quand tu remplis un mot de passe via le badge, ItsMyPassword peut enregistrer le site et l'identifiant (jamais le mot de passe) pour t'aider à retrouver tes comptes. Chiffré avec ton mot de passe maître."
+  },
   "history_setup_enable": { "message": "Activer l'historique" },
   "history_setup_skip": { "message": "Plus tard" },
   "history_save_prompt": { "message": "Enregistrer ce compte ?" },
