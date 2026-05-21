@@ -2,14 +2,14 @@
  * Persistent storage layer (chrome.storage.local).
  *
  * Holds non-secret extension state: schema version, default profile,
- * auto-lock timeout, the master-password fingerprint, the optional PIN blob
- * and per-site preferences.
+ * auto-lock timeout, the master-password fingerprint, the optional PIN blob,
+ * the opt-in account-history flag, and per-site preferences.
  *
  * No generated passwords are ever written to disk.
  */
 import { DEFAULT_RANDOM_PROFILE, type Profile } from "../shared/types.js";
 
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
 
 export interface PinBlob {
   /** AES-GCM ciphertext of the master, base64 (RFC 4648, no padding). */
@@ -26,6 +26,8 @@ export interface StoredState {
   schemaVersion: typeof SCHEMA_VERSION;
   defaultProfile: Profile;
   autoLockMinutes: number;
+  /** Opt-in. When false, the badge never records accounts. */
+  historyEnabled: boolean;
   /** 3-byte master fingerprint, hex-encoded. Present after first-run setup. */
   fingerprint?: string;
   /** Present iff PIN mode is enabled. */
@@ -40,31 +42,39 @@ export const DEFAULT_STATE: StoredState = Object.freeze({
   schemaVersion: SCHEMA_VERSION,
   defaultProfile: DEFAULT_RANDOM_PROFILE,
   autoLockMinutes: 15,
+  historyEnabled: false,
   sites: {},
 }) as StoredState;
 
 /**
  * Read the full state. Returns a defensive copy of {@link DEFAULT_STATE} when
- * the extension has never been set up.
+ * the extension has never been set up. Migrates v1 → v2 in place.
  */
 export async function loadState(): Promise<StoredState> {
   const { [STORAGE_KEY]: raw } = await chrome.storage.local.get(STORAGE_KEY);
   if (!raw || typeof raw !== "object") {
     return cloneDefault();
   }
-  const state = raw as Partial<StoredState>;
-  if (state.schemaVersion !== SCHEMA_VERSION) {
-    // For v1 we simply reset — there is no prior schema to migrate from.
+  const state = raw as Partial<Omit<StoredState, "schemaVersion">> & {
+    schemaVersion?: number;
+  };
+  const rawSchema = state.schemaVersion;
+  if (rawSchema !== 1 && rawSchema !== SCHEMA_VERSION) {
     return cloneDefault();
   }
-  return {
+  const migrated: StoredState = {
     schemaVersion: SCHEMA_VERSION,
     defaultProfile: state.defaultProfile ?? DEFAULT_RANDOM_PROFILE,
     autoLockMinutes: state.autoLockMinutes ?? 15,
+    historyEnabled: state.historyEnabled ?? false,
     ...(state.fingerprint !== undefined ? { fingerprint: state.fingerprint } : {}),
     ...(state.pin !== undefined ? { pin: state.pin } : {}),
     sites: state.sites ?? {},
   };
+  if (rawSchema === 1) {
+    await saveState(migrated);
+  }
+  return migrated;
 }
 
 /** Persist the full state. The caller is responsible for atomic updates. */
@@ -100,6 +110,7 @@ function cloneDefault(): StoredState {
     schemaVersion: SCHEMA_VERSION,
     defaultProfile: { ...DEFAULT_STATE.defaultProfile },
     autoLockMinutes: DEFAULT_STATE.autoLockMinutes,
+    historyEnabled: DEFAULT_STATE.historyEnabled,
     sites: {},
   };
 }

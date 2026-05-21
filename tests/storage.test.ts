@@ -32,6 +32,25 @@ describe("loadState", () => {
     expect(state.schemaVersion).toBe(SCHEMA_VERSION);
     expect(state.sites).toEqual({});
   });
+
+  it("defaults historyEnabled to false for fresh state", async () => {
+    const state = await loadState();
+    expect(state.historyEnabled).toBe(false);
+  });
+
+  it("migrates v1 state to v2 by adding historyEnabled=false", async () => {
+    await chrome.storage.local.set({
+      "state.v1": {
+        schemaVersion: 1,
+        defaultProfile: DEFAULT_RANDOM_PROFILE,
+        autoLockMinutes: 15,
+        sites: {},
+      },
+    });
+    const state = await loadState();
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(state.historyEnabled).toBe(false);
+  });
 });
 
 describe("saveState / updateState", () => {
@@ -40,6 +59,7 @@ describe("saveState / updateState", () => {
       schemaVersion: SCHEMA_VERSION,
       defaultProfile: DEFAULT_RANDOM_PROFILE,
       autoLockMinutes: 30,
+      historyEnabled: false,
       fingerprint: "abc",
       sites: { "example.com": DEFAULT_RANDOM_PROFILE },
     });
@@ -76,6 +96,7 @@ describe("wipeAll", () => {
       schemaVersion: SCHEMA_VERSION,
       defaultProfile: DEFAULT_RANDOM_PROFILE,
       autoLockMinutes: 15,
+      historyEnabled: false,
       fingerprint: "x",
       sites: {},
     });

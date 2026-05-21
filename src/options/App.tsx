@@ -5,6 +5,8 @@ import { send } from "./api.js";
 import { SitesSection } from "./components/SitesSection.js";
 import { PinSection } from "./components/PinSection.js";
 import { DangerSection } from "./components/DangerSection.js";
+import { HistorySection } from "./components/HistorySection.js";
+import { AccountsSection } from "./components/AccountsSection.js";
 import { ProfileEditor } from "../shared/ProfileEditor.js";
 import { Logo } from "../shared/Logo.js";
 import { DotGrid } from "../shared/DotGrid.js";
@@ -16,6 +18,8 @@ interface State {
   defaultProfile: Profile;
   autoLockMinutes: number;
   hasPin: boolean;
+  historyEnabled: boolean;
+  accountsCount: number;
   sites: Record<string, Profile>;
 }
 
@@ -26,10 +30,21 @@ export function App() {
   const refresh = async () => {
     try {
       const res = await send({ kind: "getState" });
+      let accountsCount = 0;
+      if (res.historyEnabled) {
+        try {
+          const list = await send({ kind: "listAccounts" });
+          accountsCount = list.entries.length;
+        } catch {
+          accountsCount = 0;
+        }
+      }
       setState({
         defaultProfile: res.defaultProfile,
         autoLockMinutes: res.autoLockMinutes,
         hasPin: res.hasPin,
+        historyEnabled: res.historyEnabled,
+        accountsCount,
         sites: res.sites,
       });
       setError(null);
@@ -119,6 +134,14 @@ export function App() {
         </Section>
 
         <PinSection hasPin={state.hasPin} onChange={refresh} />
+
+        <HistorySection
+          enabled={state.historyEnabled}
+          hasEntries={state.accountsCount > 0}
+          onChange={refresh}
+        />
+
+        <AccountsSection enabled={state.historyEnabled} />
 
         <SitesSection sites={state.sites} onChange={refresh} />
 

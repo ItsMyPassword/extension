@@ -65,3 +65,17 @@ export const DEFAULT_MEMORABLE_PROFILE: MemorableProfile = {
   suffix: true,
   counter: 1,
 };
+
+/**
+ * A saved account the user has registered for on a given site. We store
+ * only the username/email — never the password, which stays deterministic.
+ *
+ * `(domain, username)` is the unique key; re-recording an existing entry
+ * just bumps `lastUsedAt`.
+ */
+export interface AccountEntry {
+  domain: string;
+  username: string;
+  createdAt: number;
+  lastUsedAt: number;
+}
