@@ -417,4 +417,11 @@ describe("router — sync handlers (locked state)", () => {
     expect(res.skipped).toBeNull();
     expect(res.cursor).toBeNull();
   });
+
+  it("getSyncMap returns an empty map on a fresh install", async () => {
+    const res = await handleRequest({ kind: "getSyncMap" });
+    if (res.ok === false) throw new Error(res.error);
+    if (!("map" in res)) throw new Error("unexpected shape");
+    expect(res.map).toEqual({});
+  });
 }, 120_000);

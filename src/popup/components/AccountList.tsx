@@ -2,10 +2,11 @@
  * Vault list. Each row opens the account-detail page on click; a per-row
  * "⋮" menu exposes copy username / copy password / open / delete inline.
  */
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { motion } from "framer-motion";
 import { Favicon } from "./Favicon.js";
 import { AccountRowMenu } from "./AccountRowMenu.js";
+import { send } from "../api.js";
 import { t } from "../../shared/i18n.js";
 import { SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import type { AccountEntry } from "../../shared/types.js";
@@ -17,6 +18,29 @@ interface Props {
 
 export function AccountList({ onAddNew }: Props) {
   const [query, setQuery] = useState("");
+  const [syncConnected, setSyncConnected] = useState(false);
+  const [syncMap, setSyncMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const status = await send({ kind: "syncStatus" });
+        if (cancelled) return;
+        const approved = status.connected && status.session?.approvalStatus === "approved";
+        setSyncConnected(approved);
+        if (approved) {
+          const m = await send({ kind: "getSyncMap" });
+          if (!cancelled) setSyncMap(m.map);
+        }
+      } catch {
+        /* silent */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const sorted = useMemo(() => {
     const entries = allAccounts.value;
@@ -99,7 +123,17 @@ export function AccountList({ onAddNew }: Props) {
                     }
                   }}
                 >
-                  <Favicon domain={entry.domain} size={32} />
+                  <Favicon
+                    domain={entry.domain}
+                    size={32}
+                    {...(syncConnected
+                      ? {
+                          syncBadge: (syncMap[entry.domain + entry.username] !== undefined
+                            ? "synced"
+                            : "pending") as "synced" | "pending",
+                        }
+                      : {})}
+                  />
                   <span class="flex flex-col flex-1 min-w-0 text-left">
                     <span class="text-sm font-medium truncate text-(--color-ink)">
                       {entry.domain}

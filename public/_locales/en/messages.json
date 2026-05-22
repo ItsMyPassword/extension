@@ -69,6 +69,15 @@
     "message": "Everything stays on this device. We never store generated passwords."
   },
   "options_language_section": { "message": "Language" },
+  "settings_group_generation": { "message": "Generation" },
+  "settings_group_accounts": { "message": "Accounts" },
+  "settings_group_sync": { "message": "Sync" },
+  "settings_group_security": { "message": "Security" },
+  "settings_group_comfort": { "message": "Comfort" },
+  "settings_group_danger": { "message": "Advanced" },
+  "settings_sync_history_off_hint": {
+    "message": "Enable \"Remember accounts\" to be able to sync to a server."
+  },
   "options_default_section": { "message": "Default profile" },
   "options_default_hint": {
     "message": "Used on sites without a specific override."

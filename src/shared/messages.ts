@@ -47,6 +47,7 @@ export type Request =
   | { kind: "syncPollApproval" }
   | { kind: "syncDisconnect" }
   | { kind: "getAccountSyncInfo"; domain: string; username: string }
+  | { kind: "getSyncMap" }
   | { kind: "syncPull" };
 
 // All responses share the same shape on success; we use a small set of
@@ -61,33 +62,35 @@ export type Response<T extends Request> = T extends { kind: "syncStatus" }
         ? SyncPollApprovalResponse
         : T extends { kind: "getAccountSyncInfo" }
           ? GetAccountSyncInfoResponse
-          : T extends { kind: "syncPull" }
-            ? SyncPullResponse
-            : T extends { kind: "status" }
-              ? StatusResponse
-              : T extends { kind: "unlock" | "unlockWithPin" | "setup" }
-                ? UnlockResponse
-                : T extends { kind: "fingerprint" }
-                  ? FingerprintResponse
-                  : T extends { kind: "generate" }
-                    ? GenerateResponse
-                    : T extends { kind: "getProfile" }
-                      ? GetProfileResponse
-                      : T extends { kind: "getState" }
-                        ? GetStateResponse
-                        : T extends { kind: "listAccounts" }
-                          ? ListAccountsResponse
-                          : T extends {
-                                kind: "recordAccount" | "updateAccountProfile" | "renameAccount";
-                              }
-                            ? RecordAccountResponse
-                            : T extends { kind: "setHistoryEnabled" }
-                              ? SetHistoryEnabledResponse
-                              : T extends { kind: "getPendingSave" }
-                                ? GetPendingSaveResponse
-                                : T extends { kind: "getRecentUsername" }
-                                  ? GetRecentUsernameResponse
-                                  : OkResponse;
+          : T extends { kind: "getSyncMap" }
+            ? GetSyncMapResponse
+            : T extends { kind: "syncPull" }
+              ? SyncPullResponse
+              : T extends { kind: "status" }
+                ? StatusResponse
+                : T extends { kind: "unlock" | "unlockWithPin" | "setup" }
+                  ? UnlockResponse
+                  : T extends { kind: "fingerprint" }
+                    ? FingerprintResponse
+                    : T extends { kind: "generate" }
+                      ? GenerateResponse
+                      : T extends { kind: "getProfile" }
+                        ? GetProfileResponse
+                        : T extends { kind: "getState" }
+                          ? GetStateResponse
+                          : T extends { kind: "listAccounts" }
+                            ? ListAccountsResponse
+                            : T extends {
+                                  kind: "recordAccount" | "updateAccountProfile" | "renameAccount";
+                                }
+                              ? RecordAccountResponse
+                              : T extends { kind: "setHistoryEnabled" }
+                                ? SetHistoryEnabledResponse
+                                : T extends { kind: "getPendingSave" }
+                                  ? GetPendingSaveResponse
+                                  : T extends { kind: "getRecentUsername" }
+                                    ? GetRecentUsernameResponse
+                                    : OkResponse;
 
 export interface OkResponse {
   ok: true;
@@ -208,6 +211,13 @@ export interface GetAccountSyncInfoResponse {
   /** Unix ms of the last successful server push for this (domain, username),
    * or null if nothing has been synced yet (or no server is connected). */
   lastSyncedAt: number | null;
+}
+
+export interface GetSyncMapResponse {
+  ok: true;
+  /** Map of `${domain}${username}` → unix ms of last successful push.
+   * Empty map when no server is connected. */
+  map: Record<string, number>;
 }
 
 export interface SyncPullResponse {

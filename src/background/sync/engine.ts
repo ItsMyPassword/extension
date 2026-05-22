@@ -57,6 +57,16 @@ export async function clearLastSyncMap(): Promise<void> {
   await chrome.storage.local.remove(LAST_SYNC_KEY);
 }
 
+export async function getAllLastSyncedAt(): Promise<Record<string, number>> {
+  return loadLastSyncMap();
+}
+
+/** Stable key used by callers (popup) so they don't have to know our
+ * internal `${domain}${username}` convention. */
+export function syncMapKey(domain: string, username: string): string {
+  return key(domain, username);
+}
+
 interface ApprovedContext {
   session: SyncSession & { status: "approved" };
   master: string;
