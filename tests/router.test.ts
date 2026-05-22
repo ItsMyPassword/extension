@@ -479,7 +479,7 @@ describe("router — vault registry", () => {
     await handleRequest({ kind: "switchVault", id: pinVaultId });
     const pinStatus = await handleRequest({ kind: "status" });
     if (pinStatus.ok === false) throw new Error(pinStatus.error);
-    if (!("hasPin" in pinStatus)) throw new Error("unexpected shape");
+    if (!("locked" in pinStatus)) throw new Error("unexpected shape");
     expect(pinStatus.hasPin).toBe(true);
     expect(pinStatus.locked).toBe(true);
   });
