@@ -39,33 +39,44 @@ export type Request =
   | { kind: "armClipboardClear"; seconds?: number }
   | { kind: "cancelClipboardClear" }
   | { kind: "setRecentUsername"; domain: string; username: string }
-  | { kind: "getRecentUsername"; domain: string };
+  | { kind: "getRecentUsername"; domain: string }
+  // --- server sync ---------------------------------------------------------
+  | { kind: "syncStatus" }
+  | { kind: "syncTestConnection"; baseUrl: string }
+  | { kind: "syncConnect"; baseUrl: string; email: string; master: string; deviceLabel?: string }
+  | { kind: "syncDisconnect" };
 
 // All responses share the same shape on success; we use a small set of
 // payload types and let TS pick the right one via the discriminator.
-export type Response<T extends Request> = T extends { kind: "status" }
-  ? StatusResponse
-  : T extends { kind: "unlock" | "unlockWithPin" | "setup" }
-    ? UnlockResponse
-    : T extends { kind: "fingerprint" }
-      ? FingerprintResponse
-      : T extends { kind: "generate" }
-        ? GenerateResponse
-        : T extends { kind: "getProfile" }
-          ? GetProfileResponse
-          : T extends { kind: "getState" }
-            ? GetStateResponse
-            : T extends { kind: "listAccounts" }
-              ? ListAccountsResponse
-              : T extends { kind: "recordAccount" | "updateAccountProfile" | "renameAccount" }
-                ? RecordAccountResponse
-                : T extends { kind: "setHistoryEnabled" }
-                  ? SetHistoryEnabledResponse
-                  : T extends { kind: "getPendingSave" }
-                    ? GetPendingSaveResponse
-                    : T extends { kind: "getRecentUsername" }
-                      ? GetRecentUsernameResponse
-                      : OkResponse;
+export type Response<T extends Request> = T extends { kind: "syncStatus" }
+  ? SyncStatusResponse
+  : T extends { kind: "syncTestConnection" }
+    ? SyncTestConnectionResponse
+    : T extends { kind: "syncConnect" }
+      ? SyncConnectResponse
+      : T extends { kind: "status" }
+        ? StatusResponse
+        : T extends { kind: "unlock" | "unlockWithPin" | "setup" }
+          ? UnlockResponse
+          : T extends { kind: "fingerprint" }
+            ? FingerprintResponse
+            : T extends { kind: "generate" }
+              ? GenerateResponse
+              : T extends { kind: "getProfile" }
+                ? GetProfileResponse
+                : T extends { kind: "getState" }
+                  ? GetStateResponse
+                  : T extends { kind: "listAccounts" }
+                    ? ListAccountsResponse
+                    : T extends { kind: "recordAccount" | "updateAccountProfile" | "renameAccount" }
+                      ? RecordAccountResponse
+                      : T extends { kind: "setHistoryEnabled" }
+                        ? SetHistoryEnabledResponse
+                        : T extends { kind: "getPendingSave" }
+                          ? GetPendingSaveResponse
+                          : T extends { kind: "getRecentUsername" }
+                            ? GetRecentUsernameResponse
+                            : OkResponse;
 
 export interface OkResponse {
   ok: true;
@@ -139,6 +150,38 @@ export interface GetPendingSaveResponse {
 export interface GetRecentUsernameResponse {
   ok: true;
   username: string | null;
+}
+
+/** Subset of SyncSession safe to expose to the popup/options UI. */
+export interface SyncSessionView {
+  baseUrl: string;
+  email: string;
+  deviceId: string;
+  connectedAt: number;
+  lastSyncAt: number | null;
+}
+
+export interface SyncStatusResponse {
+  ok: true;
+  /** True when a session is persisted (regardless of whether it's been
+   * validated against the server since this SW started). */
+  connected: boolean;
+  session: SyncSessionView | null;
+}
+
+export interface SyncTestConnectionResponse {
+  ok: true;
+  reachable: boolean;
+  /** Human-readable reason on failure (timeout, dns, http status, etc.). */
+  reason?: string;
+}
+
+export interface SyncConnectResponse {
+  ok: true;
+  session: SyncSessionView;
+  /** True when the server already had a matching account and we logged in;
+   * false when we registered a fresh account. */
+  loggedIn: boolean;
 }
 
 /** Discriminator for `chrome.runtime.onMessage` callbacks. */
