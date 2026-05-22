@@ -69,6 +69,15 @@
     "message": "Tout reste sur cet appareil. Nous ne stockons jamais les mots de passe générés."
   },
   "options_language_section": { "message": "Langue" },
+  "settings_group_generation": { "message": "Génération" },
+  "settings_group_accounts": { "message": "Comptes" },
+  "settings_group_sync": { "message": "Synchronisation" },
+  "settings_group_security": { "message": "Sécurité" },
+  "settings_group_comfort": { "message": "Confort" },
+  "settings_group_danger": { "message": "Avancé" },
+  "settings_sync_history_off_hint": {
+    "message": "Active « Mémoriser les comptes » pour pouvoir synchroniser un serveur."
+  },
   "options_default_section": { "message": "Profil par défaut" },
   "options_default_hint": {
     "message": "Utilisé sur les sites sans paramétrage spécifique."

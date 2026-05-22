@@ -35,6 +35,7 @@ import {
 } from "./sync/runner.js";
 import {
   clearLastSyncMap,
+  getAllLastSyncedAt,
   getLastSyncedAt,
   pullEvents as enginePull,
   syncAccountChange,
@@ -44,6 +45,7 @@ import type {
   FingerprintResponse,
   GenerateResponse,
   GetAccountSyncInfoResponse,
+  GetSyncMapResponse,
   GetPendingSaveResponse,
   GetProfileResponse,
   GetRecentUsernameResponse,
@@ -82,6 +84,7 @@ type AnyResponse =
   | SyncConnectResponse
   | SyncPollApprovalResponse
   | GetAccountSyncInfoResponse
+  | GetSyncMapResponse
   | SyncPullResponse;
 
 export async function handleRequest(request: Request): Promise<AnyResponse> {
@@ -246,6 +249,10 @@ export async function handleRequest(request: Request): Promise<AnyResponse> {
       case "getAccountSyncInfo": {
         const lastSyncedAt = await getLastSyncedAt(request.domain, request.username);
         return { ok: true, lastSyncedAt };
+      }
+      case "getSyncMap": {
+        const map = await getAllLastSyncedAt();
+        return { ok: true, map };
       }
       case "syncPull": {
         const r = await enginePull();
@@ -478,7 +485,14 @@ async function handleSetHistoryEnabled(
   enabled: boolean,
 ): Promise<SetHistoryEnabledResponse | ErrorResponse> {
   let cleared = 0;
-  if (!enabled) cleared = await wipeAccounts();
+  if (!enabled) {
+    cleared = await wipeAccounts();
+    // Disabling history kills the rationale for sync — there's nothing
+    // left to push or pull. We disconnect (best-effort) and wipe the
+    // last-sync map so a future reactivation starts clean.
+    await syncDisconnect();
+    await clearLastSyncMap();
+  }
   await updateState((s) => ({ ...s, historyEnabled: enabled }));
   return { ok: true, cleared };
 }

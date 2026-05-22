@@ -121,7 +121,7 @@ export function SettingsScreen() {
         ) : (
           <motion.div
             key="content"
-            class="flex flex-col gap-6"
+            class="flex flex-col gap-8"
             initial="initial"
             animate="animate"
             variants={{
@@ -129,51 +129,92 @@ export function SettingsScreen() {
               animate: { transition: { staggerChildren: 0.05 } },
             }}
           >
-            <CompactSection title={t("options_default_section")} hint={t("options_default_hint")}>
-              <ProfileEditor
-                profile={state.defaultProfile}
-                onChange={async (next) => {
-                  await send({ kind: "setDefaultProfile", profile: next });
-                  await refresh();
-                }}
-              />
-            </CompactSection>
-
-            <CompactSection title={t("options_autolock_section")} hint={t("options_autolock_hint")}>
-              <label class="flex items-center justify-between gap-3">
-                <span class="text-sm">{t("options_autolock_label")}</span>
-                <input
-                  class="input input-mono w-20"
-                  type="number"
-                  min={0}
-                  max={1440}
-                  value={state.autoLockMinutes}
-                  onChange={async (e) => {
-                    const minutes = Number.parseInt((e.target as HTMLInputElement).value, 10);
-                    if (Number.isFinite(minutes)) {
-                      await send({ kind: "setAutoLockMinutes", minutes });
-                      await refresh();
-                    }
+            <SettingsGroup title={t("settings_group_generation")}>
+              <CompactSection title={t("options_default_section")} hint={t("options_default_hint")}>
+                <ProfileEditor
+                  profile={state.defaultProfile}
+                  onChange={async (next) => {
+                    await send({ kind: "setDefaultProfile", profile: next });
+                    await refresh();
                   }}
                 />
-              </label>
-            </CompactSection>
+              </CompactSection>
+              <SitesSection sites={state.sites} onChange={refresh} />
+            </SettingsGroup>
 
-            <PinSection hasPin={state.hasPin} onChange={refresh} />
-            <HistorySection
-              enabled={state.historyEnabled}
-              hasEntries={state.accountsCount > 0}
-              onChange={refresh}
-            />
-            <FaviconSection enabled={state.faviconFallbackEnabled} onChange={refresh} />
-            <ClipboardSection seconds={state.clipboardClearSeconds} onChange={refresh} />
-            <SitesSection sites={state.sites} onChange={refresh} />
-            <SyncSection />
-            <DangerSection onChange={refresh} />
+            <SettingsGroup title={t("settings_group_security")}>
+              <CompactSection
+                title={t("options_autolock_section")}
+                hint={t("options_autolock_hint")}
+              >
+                <label class="flex items-center justify-between gap-3">
+                  <span class="text-sm">{t("options_autolock_label")}</span>
+                  <input
+                    class="input input-mono w-20"
+                    type="number"
+                    min={0}
+                    max={1440}
+                    value={state.autoLockMinutes}
+                    onChange={async (e) => {
+                      const minutes = Number.parseInt((e.target as HTMLInputElement).value, 10);
+                      if (Number.isFinite(minutes)) {
+                        await send({ kind: "setAutoLockMinutes", minutes });
+                        await refresh();
+                      }
+                    }}
+                  />
+                </label>
+              </CompactSection>
+              <PinSection hasPin={state.hasPin} onChange={refresh} />
+            </SettingsGroup>
+
+            <SettingsGroup title={t("settings_group_accounts")}>
+              <HistorySection
+                enabled={state.historyEnabled}
+                hasEntries={state.accountsCount > 0}
+                onChange={refresh}
+              />
+            </SettingsGroup>
+
+            <SettingsGroup title={t("settings_group_sync")}>
+              {state.historyEnabled ? (
+                <SyncSection />
+              ) : (
+                <div class="card p-5 flex-col gap-2">
+                  <span class="text-sm text-(--color-ink)">
+                    {t("settings_sync_history_off_hint")}
+                  </span>
+                </div>
+              )}
+            </SettingsGroup>
+
+            <SettingsGroup title={t("settings_group_comfort")}>
+              <FaviconSection enabled={state.faviconFallbackEnabled} onChange={refresh} />
+              <ClipboardSection seconds={state.clipboardClearSeconds} onChange={refresh} />
+            </SettingsGroup>
+
+            <SettingsGroup title={t("settings_group_danger")}>
+              <DangerSection onChange={refresh} />
+            </SettingsGroup>
           </motion.div>
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+function SettingsGroup({ title, children }: { title: string; children: ComponentChildren }) {
+  return (
+    <motion.section
+      class="flex flex-col gap-4"
+      variants={{
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0, transition: SOFT_SPRING },
+      }}
+    >
+      <h2 class="mono-tag m-0 px-1">{title}</h2>
+      <div class="flex flex-col gap-5">{children}</div>
+    </motion.section>
   );
 }
 
