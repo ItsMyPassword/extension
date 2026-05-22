@@ -328,6 +328,14 @@
       text-left cursor-pointer transition-colors duration-150
       hover:bg-(--color-surface-sunken) hover:border-(--color-line-strong);
   }
+  .settings-row {
+    @apply w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl
+      bg-(--color-surface-elev) border border-(--color-line)
+      text-left cursor-pointer transition-colors duration-150
+      hover:bg-(--color-surface-sunken) hover:border-(--color-line-strong)
+      focus-visible:outline focus-visible:outline-2
+      focus-visible:outline-(--color-accent-500);
+  }
   .account-row--active {
     border-color: var(--color-accent-500);
   }

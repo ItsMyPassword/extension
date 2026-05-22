@@ -75,6 +75,14 @@
   "settings_group_security": { "message": "Security" },
   "settings_group_comfort": { "message": "Comfort" },
   "settings_group_danger": { "message": "Advanced" },
+  "settings_group_generation_hint": { "message": "Default profile and per-site overrides." },
+  "settings_group_accounts_hint": {
+    "message": "Local memory of (site, username) pairs."
+  },
+  "settings_group_sync_hint": { "message": "Connect to a self-hosted server." },
+  "settings_group_security_hint": { "message": "Auto-lock and PIN." },
+  "settings_group_comfort_hint": { "message": "Favicons and clipboard." },
+  "settings_group_danger_hint": { "message": "Full reset." },
   "settings_sync_history_off_hint": {
     "message": "Enable \"Remember accounts\" to be able to sync to a server."
   },

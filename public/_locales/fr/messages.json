@@ -75,6 +75,14 @@
   "settings_group_security": { "message": "Sécurité" },
   "settings_group_comfort": { "message": "Confort" },
   "settings_group_danger": { "message": "Avancé" },
+  "settings_group_generation_hint": { "message": "Profil par défaut et réglages par site." },
+  "settings_group_accounts_hint": {
+    "message": "Mémorisation locale des couples (site, identifiant)."
+  },
+  "settings_group_sync_hint": { "message": "Connexion à un serveur self-hosted." },
+  "settings_group_security_hint": { "message": "Auto-lock et PIN." },
+  "settings_group_comfort_hint": { "message": "Favicons et presse-papiers." },
+  "settings_group_danger_hint": { "message": "Réinitialisation complète." },
   "settings_sync_history_off_hint": {
     "message": "Active « Mémoriser les comptes » pour pouvoir synchroniser un serveur."
   },
