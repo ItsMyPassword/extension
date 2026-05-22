@@ -670,8 +670,8 @@ export function AccountDetailScreen() {
         </span>
         {lastSyncedAt !== null ? (
           <span class="text-xs text-(--color-ink-subtle)">
-            Synchronisé {formatRelativeAge(lastSyncedAt.ts)} {directionPreposition(lastSyncedAt.dir)}{" "}
-            le serveur.
+            Synchronisé {formatRelativeAge(lastSyncedAt.ts)}{" "}
+            {directionPreposition(lastSyncedAt.dir)} le serveur.
           </span>
         ) : null}
         {confirmingDelete ? (
