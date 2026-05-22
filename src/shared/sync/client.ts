@@ -146,12 +146,7 @@ export class SyncClient {
     return this.req("DELETE", `/devices/${encodeURIComponent(id)}`, undefined, true);
   }
   pullEvents(since: number, limit = 100): Promise<EventListResponse> {
-    return this.req(
-      "GET",
-      `/events?since=${since}&limit=${limit}`,
-      undefined,
-      true,
-    );
+    return this.req("GET", `/events?since=${since}&limit=${limit}`, undefined, true);
   }
   pushEvent(body: {
     lamport: number;

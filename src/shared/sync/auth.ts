@@ -17,12 +17,7 @@ import {
   getOpaqueConfig,
 } from "@cloudflare/opaque-ts";
 
-import {
-  bytesToBase64Url,
-  deriveMasterKey,
-  lkToPassword,
-  splitMasterKey,
-} from "./keys.js";
+import { bytesToBase64Url, deriveMasterKey, lkToPassword, splitMasterKey } from "./keys.js";
 import {
   SyncApiError,
   SyncClient,
@@ -174,7 +169,9 @@ export async function syncLogin(args: LoginArgs): Promise<SyncSession> {
     throw new SyncApiError(401, { error: "invalid_master" }, "wrong master password");
   }
 
-  const pub = args.existing ? base64UrlToBytes(args.existing.devicePubkey) : generateDeviceKeypair().pub;
+  const pub = args.existing
+    ? base64UrlToBytes(args.existing.devicePubkey)
+    : generateDeviceKeypair().pub;
   const priv = args.existing
     ? args.existing.devicePrivkey
     : bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
@@ -244,7 +241,6 @@ function base64UrlToBytes(s: string): Uint8Array {
 function defaultDeviceLabel(): string {
   // navigator.userAgentData is widely available in MV3 service workers.
   const platform =
-    (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ??
-    "unknown";
+    (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? "unknown";
   return `${platform} • ${new Date().toISOString().slice(0, 10)}`;
 }
