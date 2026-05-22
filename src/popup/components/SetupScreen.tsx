@@ -8,6 +8,7 @@ import {
   busy,
   errorMessage,
   fingerprint as fingerprintSignal,
+  hasPin as hasPinSignal,
   historyEnabled,
   livePreview,
   screen,
@@ -20,7 +21,40 @@ export function SetupScreen() {
   const [master, setMaster] = useState("");
   const [confirm, setConfirm] = useState("");
   const [step, setStep] = useState<"master" | "history">("master");
+  const [hasOtherVaults, setHasOtherVaults] = useState(false);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Decide whether to offer an "Annuler" escape — only useful if there is
+  // at least one *other* profile we could fall back to.
+  useEffect(() => {
+    let cancelled = false;
+    void send({ kind: "listVaults" }).then(
+      (res) => {
+        if (!cancelled) setHasOtherVaults(res.vaults.length > 0);
+      },
+      () => {
+        /* swallow */
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const cancelToExisting = useCallback(async () => {
+    try {
+      const res = await send({ kind: "listVaults" });
+      const fallback = [...res.vaults].sort((a, b) => b.lastUsedAt - a.lastUsedAt)[0];
+      if (fallback === undefined) return;
+      await send({ kind: "switchVault", id: fallback.id });
+      const status = await send({ kind: "status" });
+      fingerprintSignal.value = status.fingerprint;
+      hasPinSignal.value = status.hasPin;
+      screen.value = status.isFirstRun ? "setup" : "unlock";
+    } catch (err) {
+      errorMessage.value = err instanceof Error ? err.message : "could not switch back";
+    }
+  }, []);
 
   useEffect(() => {
     if (previewTimer.current !== null) clearTimeout(previewTimer.current);
@@ -180,6 +214,18 @@ export function SetupScreen() {
       <motion.button type="submit" class="btn" whileTap={TAP_SCALE} disabled={busy.value}>
         {busy.value ? t("setup_creating") : t("setup_create_button")}
       </motion.button>
+
+      {hasOtherVaults ? (
+        <motion.button
+          type="button"
+          class="btn btn-ghost"
+          whileTap={TAP_SCALE}
+          onClick={() => void cancelToExisting()}
+          disabled={busy.value}
+        >
+          Annuler — utiliser un profil existant
+        </motion.button>
+      ) : null}
     </motion.form>
   );
 }

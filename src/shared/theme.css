@@ -394,6 +394,22 @@
     @apply text-sm tracking-[0.3em];
   }
 
+  .vault-avatar {
+    @apply grid place-items-center shrink-0 w-9 h-9 rounded-full p-0
+      bg-(--color-surface-sunken) border border-(--color-line)
+      cursor-pointer transition-colors;
+  }
+  .vault-avatar:hover {
+    @apply border-(--color-line-strong) bg-(--color-surface);
+  }
+  .vault-avatar:focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+  }
+  .vault-avatar__emoji {
+    @apply text-base leading-none select-none;
+  }
+
   .switch {
     @apply relative inline-block w-9 h-5 shrink-0;
   }

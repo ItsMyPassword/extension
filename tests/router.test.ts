@@ -426,3 +426,83 @@ describe("router — sync handlers (locked state)", () => {
     expect(res.map).toEqual({});
   });
 }, 120_000);
+
+describe("router — vault registry", () => {
+  it("setup creates the first vault and listVaults returns it", async () => {
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    const res = await handleRequest({ kind: "listVaults" });
+    if (res.ok === false) throw new Error(res.error);
+    if (!("vaults" in res)) throw new Error("unexpected shape");
+    expect(res.vaults).toHaveLength(1);
+    expect(res.activeId).toBe(res.vaults[0]?.id ?? null);
+  });
+
+  it("startNewVault clears active and routes the next setup to a brand-new vault", async () => {
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    const before = await handleRequest({ kind: "listVaults" });
+    if (before.ok === false) throw new Error(before.error);
+    if (!("activeId" in before)) throw new Error("unexpected shape");
+    const firstId = before.activeId;
+
+    await handleRequest({ kind: "startNewVault" });
+    const between = await handleRequest({ kind: "status" });
+    if (between.ok === false) throw new Error(between.error);
+    if (!("isFirstRun" in between)) throw new Error("unexpected shape");
+    expect(between.isFirstRun).toBe(true);
+
+    await handleRequest({ kind: "setup", master: "another-very-long-master" });
+    const after = await handleRequest({ kind: "listVaults" });
+    if (after.ok === false) throw new Error(after.error);
+    if (!("vaults" in after)) throw new Error("unexpected shape");
+    expect(after.vaults).toHaveLength(2);
+    expect(after.activeId).not.toBe(firstId);
+  });
+
+  it("status after switching to a PIN-enabled vault reports hasPin=true", async () => {
+    // Vault #1 — set up + enable PIN.
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    await handleRequest({ kind: "setPin", pin: "1234" });
+    const v1 = await handleRequest({ kind: "listVaults" });
+    if (v1.ok === false) throw new Error(v1.error);
+    if (!("activeId" in v1)) throw new Error("unexpected shape");
+    const pinVaultId = v1.activeId!;
+
+    // Vault #2 — no PIN.
+    await handleRequest({ kind: "startNewVault" });
+    await handleRequest({ kind: "setup", master: "another-very-long-master" });
+    const noPinStatus = await handleRequest({ kind: "status" });
+    if (noPinStatus.ok === false) throw new Error(noPinStatus.error);
+    if (!("hasPin" in noPinStatus)) throw new Error("unexpected shape");
+    expect(noPinStatus.hasPin).toBe(false);
+
+    // Switch back to vault #1 and expect status.hasPin to be true again.
+    await handleRequest({ kind: "switchVault", id: pinVaultId });
+    const pinStatus = await handleRequest({ kind: "status" });
+    if (pinStatus.ok === false) throw new Error(pinStatus.error);
+    if (!("hasPin" in pinStatus)) throw new Error("unexpected shape");
+    expect(pinStatus.hasPin).toBe(true);
+    expect(pinStatus.locked).toBe(true);
+  });
+
+  it("deleting the active vault re-points to the next-most-recent one", async () => {
+    await handleRequest({ kind: "setup", master: "super-long-master" });
+    const v1 = await handleRequest({ kind: "listVaults" });
+    if (v1.ok === false) throw new Error(v1.error);
+    if (!("activeId" in v1)) throw new Error("unexpected shape");
+    const firstId = v1.activeId!;
+
+    await handleRequest({ kind: "startNewVault" });
+    await handleRequest({ kind: "setup", master: "another-very-long-master" });
+    const v2 = await handleRequest({ kind: "listVaults" });
+    if (v2.ok === false) throw new Error(v2.error);
+    if (!("activeId" in v2)) throw new Error("unexpected shape");
+    const secondId = v2.activeId!;
+
+    await handleRequest({ kind: "deleteVault", id: secondId });
+    const after = await handleRequest({ kind: "listVaults" });
+    if (after.ok === false) throw new Error(after.error);
+    if (!("activeId" in after)) throw new Error("unexpected shape");
+    expect(after.activeId).toBe(firstId);
+    expect(after.vaults).toHaveLength(1);
+  });
+}, 240_000);
