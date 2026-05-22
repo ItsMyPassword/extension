@@ -25,6 +25,12 @@ import { getRecentUsername, setRecentUsername } from "./recent-username.js";
 import { armClipboardClear, cancelClipboardClear } from "./clipboard.js";
 import { effectiveProfile, loadState, updateState, wipeAll, type StoredState } from "./storage.js";
 import { lock, readMaster, status as sessionStatus, unlock } from "./session.js";
+import {
+  connect as syncConnect,
+  disconnect as syncDisconnect,
+  getSyncStatus,
+  testConnection,
+} from "./sync/runner.js";
 import type {
   ErrorResponse,
   FingerprintResponse,
@@ -39,6 +45,9 @@ import type {
   Request,
   SetHistoryEnabledResponse,
   StatusResponse,
+  SyncConnectResponse,
+  SyncStatusResponse,
+  SyncTestConnectionResponse,
   UnlockResponse,
 } from "../shared/messages.js";
 import { DEFAULT_RANDOM_PROFILE, type Profile } from "../shared/types.js";
@@ -56,7 +65,10 @@ type AnyResponse =
   | RecordAccountResponse
   | SetHistoryEnabledResponse
   | GetPendingSaveResponse
-  | GetRecentUsernameResponse;
+  | GetRecentUsernameResponse
+  | SyncStatusResponse
+  | SyncTestConnectionResponse
+  | SyncConnectResponse;
 
 export async function handleRequest(request: Request): Promise<AnyResponse> {
   try {
@@ -168,6 +180,32 @@ export async function handleRequest(request: Request): Promise<AnyResponse> {
         await wipeAll();
         await wipeAccounts();
         await lock();
+        return { ok: true };
+      case "syncStatus": {
+        const status = await getSyncStatus();
+        return { ok: true, connected: status.connected, session: status.session };
+      }
+      case "syncTestConnection": {
+        const r = await testConnection(request.baseUrl);
+        return r.reason !== undefined
+          ? { ok: true, reachable: r.reachable, reason: r.reason }
+          : { ok: true, reachable: r.reachable };
+      }
+      case "syncConnect": {
+        const result = await syncConnect({
+          baseUrl: request.baseUrl,
+          email: request.email,
+          master: request.master,
+          ...(request.deviceLabel !== undefined ? { deviceLabel: request.deviceLabel } : {}),
+        });
+        const status = await getSyncStatus();
+        if (!status.session) {
+          return { ok: false, error: "sync_persist_failed" };
+        }
+        return { ok: true, session: status.session, loggedIn: result.loggedIn };
+      }
+      case "syncDisconnect":
+        await syncDisconnect();
         return { ok: true };
     }
   } catch (error) {
