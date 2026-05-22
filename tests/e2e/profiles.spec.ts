@@ -3,6 +3,7 @@ import { expect, test } from "./fixtures.js";
 
 const HEADER_ACTION = "header button[aria-label]";
 const PROFILE_CHIP = "header .fingerprint";
+const VAULT_AVATAR = "header .vault-avatar";
 
 async function completeSetup(page: Page, master: string): Promise<void> {
   const passwordInputs = page.locator('input[type="password"]');
@@ -21,7 +22,7 @@ test.describe("multi-profile (vaults)", () => {
     await completeSetup(page, "first-vault-master-pass");
 
     // Open the vaults screen by tapping the fingerprint chip in the header.
-    await page.locator(PROFILE_CHIP).first().click();
+    await page.locator(VAULT_AVATAR).click();
 
     // Exactly one profile, marked as active.
     const rows = page.locator(".account-row");
@@ -39,7 +40,7 @@ test.describe("multi-profile (vaults)", () => {
     const firstFingerprint = await page.locator(PROFILE_CHIP).first().textContent();
 
     // Open the vaults screen.
-    await page.locator(PROFILE_CHIP).first().click();
+    await page.locator(VAULT_AVATAR).click();
     // Tap "Ajouter un profil".
     await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
 
@@ -49,7 +50,7 @@ test.describe("multi-profile (vaults)", () => {
     expect(secondFingerprint).not.toBe(firstFingerprint);
 
     // The vaults list should now show both profiles, with the new one active.
-    await page.locator(PROFILE_CHIP).first().click();
+    await page.locator(VAULT_AVATAR).click();
     const rows = page.locator(".account-row");
     await expect(rows).toHaveCount(2, { timeout: 10_000 });
   });
@@ -64,12 +65,12 @@ test.describe("multi-profile (vaults)", () => {
     const firstFingerprint = (await page.locator(PROFILE_CHIP).first().textContent()) ?? "";
 
     // Create a second vault.
-    await page.locator(PROFILE_CHIP).first().click();
+    await page.locator(VAULT_AVATAR).click();
     await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
     await completeSetup(page, "second-vault-master-pass-different");
 
     // Switch back to the first vault via the vaults screen.
-    await page.locator(PROFILE_CHIP).first().click();
+    await page.locator(VAULT_AVATAR).click();
     const rows = page.locator(".account-row");
     await expect(rows).toHaveCount(2, { timeout: 10_000 });
     // Click the fingerprint chip inside the inactive row — clicking the row
@@ -87,5 +88,55 @@ test.describe("multi-profile (vaults)", () => {
     await page.locator('input[type="password"]').first().fill("first-vault-master-pass");
     await page.locator('button[type="submit"]').click();
     await expect(page.locator(HEADER_ACTION).first()).toBeVisible({ timeout: 30_000 });
+  });
+
+  test("the unlock screen exposes the vault switcher (avatar) so users can go back", async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await page.goto(`chrome-extension://${extensionId}/popup.html`);
+    await completeSetup(page, "first-vault-master-pass");
+    const firstFingerprint = (await page.locator(PROFILE_CHIP).first().textContent()) ?? "";
+
+    // Create + switch to a second vault, leaving us on its main screen.
+    await page.locator(VAULT_AVATAR).click();
+    await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
+    await completeSetup(page, "second-vault-master-pass-different");
+
+    // Switch to the first vault → lands on its unlock screen.
+    await page.locator(VAULT_AVATAR).click();
+    await page
+      .locator(".account-row")
+      .filter({ hasText: firstFingerprint })
+      .locator(".fingerprint")
+      .click();
+    await expect(page.locator('input[type="password"]').first()).toBeVisible({ timeout: 15_000 });
+
+    // The avatar must be there too — the user must be able to switch out
+    // without committing to the master they just landed on.
+    await expect(page.locator(VAULT_AVATAR)).toBeVisible();
+    await page.locator(VAULT_AVATAR).click();
+    await expect(page.locator(".account-row")).toHaveCount(2, { timeout: 10_000 });
+  });
+
+  test("Annuler escape on Setup routes back to an existing vault's unlock", async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await page.goto(`chrome-extension://${extensionId}/popup.html`);
+    await completeSetup(page, "first-vault-master-pass");
+
+    // Start adding a new vault but change our mind on the setup screen.
+    await page.locator(VAULT_AVATAR).click();
+    await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
+    await expect(
+      page.locator("button", { hasText: "Annuler — utiliser un profil existant" }),
+    ).toBeVisible({ timeout: 10_000 });
+    await page.locator("button", { hasText: "Annuler — utiliser un profil existant" }).click();
+
+    // We should land on the first vault's unlock screen (one password input).
+    await expect(page.locator('input[type="password"]').first()).toBeVisible({ timeout: 10_000 });
   });
 });

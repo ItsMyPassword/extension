@@ -91,7 +91,7 @@ export function UnlockScreen({ hasPin }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={SOFT_SPRING}
     >
-      <Header subtitle={t("unlock_title")} />
+      <Header subtitle={t("unlock_title")} fingerprint={fingerprint.value} />
 
       {expected !== null ? (
         <motion.div

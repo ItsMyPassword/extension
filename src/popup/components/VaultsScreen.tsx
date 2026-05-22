@@ -15,7 +15,7 @@ import { IconCheck, IconChevronRight, IconTrash } from "../../shared/icons.js";
 import { t } from "../../shared/i18n.js";
 import { SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import type { VaultMetaView } from "../../shared/messages.js";
-import { errorMessage, fingerprint, screen } from "../state.js";
+import { errorMessage, fingerprint, hasPin, screen } from "../state.js";
 
 export function VaultsScreen() {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -42,9 +42,11 @@ export function VaultsScreen() {
     setBusyId(id);
     try {
       await send({ kind: "switchVault", id });
-      // Locks and clears session — the popup now reroutes through bootstrap.
+      // Mirror what bootstrap() does so the unlock screen offers PIN mode
+      // when the destination profile has one set.
       const status = await send({ kind: "status" });
       fingerprint.value = status.fingerprint;
+      hasPin.value = status.hasPin;
       screen.value = status.isFirstRun ? "setup" : "unlock";
     } catch (err) {
       errorMessage.value = err instanceof Error ? err.message : "switch failed";
@@ -95,7 +97,7 @@ export function VaultsScreen() {
       <Header
         subtitle="Profils"
         fingerprint={fingerprint.value}
-        fingerprintIsSwitcher={false}
+        showVaultAvatar={false}
         actions={
           <motion.button
             type="button"
