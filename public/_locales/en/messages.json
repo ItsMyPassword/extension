@@ -286,5 +286,73 @@
   "sync_force_error": {
     "message": "Error: $MESSAGE$",
     "placeholders": { "message": { "content": "$1" } }
-  }
+  },
+
+  "sync_wizard_subtitle": { "message": "Sync" },
+  "sync_wizard_url_label": { "message": "Server URL" },
+  "sync_wizard_url_placeholder": { "message": "https://sync.example.com" },
+  "sync_wizard_test_busy": { "message": "Testing…" },
+  "sync_wizard_test_button": { "message": "Test connection" },
+  "sync_wizard_email_label": { "message": "Email" },
+  "sync_wizard_email_placeholder": { "message": "you@example.com" },
+  "sync_wizard_connect_busy": { "message": "Connecting…" },
+  "sync_wizard_connect_button": { "message": "Connect" },
+  "sync_wizard_pending_title": { "message": "Waiting for approval" },
+  "sync_wizard_pending_cancel": { "message": "Cancel request" },
+  "sync_wizard_approved_message": {
+    "message": "Connected to $URL$ as $EMAIL$.",
+    "placeholders": { "url": { "content": "$1" }, "email": { "content": "$2" } }
+  },
+  "sync_wizard_done": { "message": "Done" },
+  "sync_wizard_rejected_title": { "message": "Connection refused" },
+  "sync_wizard_rejected_reason": {
+    "message": "Reason: $REASON$",
+    "placeholders": { "reason": { "content": "$1" } }
+  },
+  "sync_wizard_rejected_default": {
+    "message": "The administrator refused your request. Contact them if you think this is a mistake."
+  },
+
+  "sync_reach_invalid_url": { "message": "Invalid URL. Use http:// or https://." },
+  "sync_reach_timeout": { "message": "Server did not answer within 5 seconds." },
+  "sync_reach_network": {
+    "message": "Could not reach the URL. Check it is accessible and CORS is configured for this extension."
+  },
+  "sync_reach_unexpected": {
+    "message": "The URL replies but does not look like a Keyfount server."
+  },
+  "sync_reach_http": {
+    "message": "Server replied $CODE$.",
+    "placeholders": { "code": { "content": "$1" } }
+  },
+  "sync_reach_unknown": { "message": "Unknown error during the test." },
+
+  "sync_err_locked": {
+    "message": "The extension is locked. Go back to the home screen, enter your master, then retry."
+  },
+  "sync_err_master_mismatch": {
+    "message": "Master password refused by the server. Make sure the extension's master matches the one you used at registration."
+  },
+  "sync_err_too_many": {
+    "message": "Too many recent failed attempts. Retry in a few minutes."
+  },
+  "sync_err_generic": {
+    "message": "Connection failed: $MESSAGE$",
+    "placeholders": { "message": { "content": "$1" } }
+  },
+
+  "sync_section_title": { "message": "Sync" },
+  "sync_section_loading": { "message": "Loading…" },
+  "sync_section_account": { "message": "Server account" },
+  "sync_section_server_label": { "message": "Server" },
+  "sync_section_email_label": { "message": "Identifier" },
+  "sync_section_disconnect_confirm": { "message": "Disconnect this device?" },
+  "sync_section_disconnect_button": { "message": "Disconnect" },
+  "sync_section_view_status": { "message": "View status" },
+  "sync_section_disconnect_action": { "message": "Disconnect this device" },
+  "sync_section_no_server": { "message": "No server connected yet." },
+  "sync_section_connect": { "message": "Connect a server" },
+
+  "sync_status_connected": { "message": "Connected" },
+  "sync_status_pending": { "message": "Pending" }
 }

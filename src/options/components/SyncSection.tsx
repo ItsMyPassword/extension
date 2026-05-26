@@ -82,37 +82,28 @@ export function SyncSection() {
       <div class="flex items-baseline justify-between gap-3">
         <div class="flex flex-col gap-0.5 flex-1 min-w-0">
           <h2 class="m-0 text-base font-semibold tracking-[-0.015em] text-(--color-ink)">
-            Synchronisation
+            {t("sync_section_title")}
           </h2>
-          <span class="text-xs text-(--color-ink-muted) leading-snug">
-            Relie cette extension à un serveur self-hosted pour partager tes paramètres et la liste
-            de tes comptes entre appareils. Aucun mot de passe n'est stocké côté serveur.
-          </span>
         </div>
       </div>
 
       {!loaded ? (
-        <div class="card p-5 text-xs text-(--color-ink-muted)">Chargement…</div>
+        <div class="card p-5 text-xs text-(--color-ink-muted)">{t("sync_section_loading")}</div>
       ) : session !== null ? (
         <div class="card p-5 flex-col gap-3">
           <div class="flex items-center justify-between gap-3">
-            <strong class="text-sm text-(--color-ink)">Compte serveur</strong>
+            <strong class="text-sm text-(--color-ink)">{t("sync_section_account")}</strong>
             <StatusBadge status={session.approvalStatus} />
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs text-(--color-ink-muted)">Serveur</span>
+            <span class="text-xs text-(--color-ink-muted)">{t("sync_section_server_label")}</span>
             <code class="text-sm text-(--color-ink) break-all">{session.baseUrl}</code>
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs text-(--color-ink-muted)">Identifiant</span>
+            <span class="text-xs text-(--color-ink-muted)">{t("sync_section_email_label")}</span>
             <code class="text-sm text-(--color-ink) break-all">{session.email}</code>
           </div>
-          {session.approvalStatus === "pending" ? (
-            <p class="text-xs text-(--color-ink-muted) leading-relaxed m-0">
-              En attente d'approbation par l'administrateur du serveur. Ouvre la page
-              Synchronisation pour suivre le statut en temps réel.
-            </p>
-          ) : (
+          {session.approvalStatus === "pending" ? null : (
             <div class="flex-col gap-2">
               <div class="flex gap-2">
                 <motion.button
@@ -143,10 +134,7 @@ export function SyncSection() {
           )}
           {confirmDisconnect ? (
             <div class="callout callout-danger flex-col gap-3" role="alertdialog">
-              <span>
-                Déconnecter retire la session de cet appareil. Le serveur conserve ton compte ; tu
-                peux te reconnecter quand tu veux.
-              </span>
+              <span>{t("sync_section_disconnect_confirm")}</span>
               <div class="flex justify-end gap-2">
                 <motion.button
                   type="button"
@@ -154,7 +142,7 @@ export function SyncSection() {
                   onClick={() => setConfirmDisconnect(false)}
                   whileTap={TAP_SCALE}
                 >
-                  Annuler
+                  {t("common_cancel")}
                 </motion.button>
                 <motion.button
                   type="button"
@@ -162,7 +150,7 @@ export function SyncSection() {
                   onClick={() => void disconnect()}
                   whileTap={TAP_SCALE}
                 >
-                  Déconnecter
+                  {t("sync_section_disconnect_button")}
                 </motion.button>
               </div>
             </div>
@@ -175,7 +163,7 @@ export function SyncSection() {
                   onClick={openWizard}
                   whileTap={TAP_SCALE}
                 >
-                  Voir le statut
+                  {t("sync_section_view_status")}
                 </motion.button>
               ) : (
                 <span />
@@ -186,19 +174,14 @@ export function SyncSection() {
                 onClick={() => setConfirmDisconnect(true)}
                 whileTap={TAP_SCALE}
               >
-                Déconnecter cet appareil
+                {t("sync_section_disconnect_action")}
               </motion.button>
             </div>
           )}
         </div>
       ) : (
         <div class="card p-5 flex-col gap-3">
-          <span class="text-sm text-(--color-ink)">Pas encore de serveur connecté.</span>
-          <p class="text-xs text-(--color-ink-muted) leading-relaxed">
-            L'assistant ouvre une page dédiée dans l'extension pour saisir l'URL du serveur et ton
-            identifiant. Le mot de passe maître n'est plus redemandé — l'extension utilise celui de
-            la session courante.
-          </p>
+          <span class="text-sm text-(--color-ink)">{t("sync_section_no_server")}</span>
           <div class="flex justify-end">
             <motion.button
               type="button"
@@ -206,7 +189,7 @@ export function SyncSection() {
               onClick={openWizard}
               whileTap={TAP_SCALE}
             >
-              Connecter un serveur
+              {t("sync_section_connect")}
             </motion.button>
           </div>
         </div>
@@ -261,17 +244,19 @@ function ForceResultBox({ result }: { result: ForceFeedback }) {
 
 function StatusBadge({ status }: { status: "pending" | "approved" }) {
   if (status === "approved") {
+    const label = t("sync_status_connected");
     return (
-      <span class="chip chip-success" aria-label="Connecté">
+      <span class="chip chip-success" aria-label={label}>
         <span class="status-dot" aria-hidden="true" />
-        Connecté
+        {label}
       </span>
     );
   }
+  const label = t("sync_status_pending");
   return (
-    <span class="chip chip-warning" aria-label="En attente">
+    <span class="chip chip-warning" aria-label={label}>
       <span class="status-dot" aria-hidden="true" />
-      En attente
+      {label}
     </span>
   );
 }
