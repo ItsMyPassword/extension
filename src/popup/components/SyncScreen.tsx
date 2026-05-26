@@ -22,6 +22,37 @@ import { IconChevronRight } from "../../shared/icons.js";
 import { t } from "../../shared/i18n.js";
 import { SOFT_SPRING, TAP_SCALE } from "../../shared/motion.js";
 import { fingerprint, screen } from "../state.js";
+import { loadVaultData } from "../vault.js";
+
+/**
+ * Fire-and-forget post-connect bootstrap. The moment the session
+ * lands on `approved` (either via the synchronous `syncConnect`
+ * response or via the `syncPollApproval` admin-approval poll), we
+ * (a) push every locally-known account so the server gets caught
+ * up with what was already on this device, and (b) pull whatever
+ * the server already had. Then we reload the popup vault so the
+ * account list rerenders with the merged state — otherwise the
+ * user has to close + reopen the popup to see anything change.
+ */
+function onSessionApproved(): void {
+  void (async () => {
+    try {
+      await send({ kind: "syncPushAll" });
+    } catch {
+      /* best-effort */
+    }
+    try {
+      await send({ kind: "syncPull" });
+    } catch {
+      /* best-effort */
+    }
+    try {
+      await loadVaultData();
+    } catch {
+      /* swallow */
+    }
+  })();
+}
 
 type Step = "url" | "auth" | "pending" | "approved" | "rejected";
 
@@ -78,6 +109,7 @@ export function SyncScreen() {
         if (r.status === "approved" && "session" in r) {
           setDone({ baseUrl: r.session.baseUrl, email: r.session.email, loggedIn: true });
           setStep("approved");
+          onSessionApproved();
           return;
         }
         if (r.status === "rejected") {
@@ -137,6 +169,7 @@ export function SyncScreen() {
       } else {
         setDone({ baseUrl: res.session.baseUrl, email: res.session.email, loggedIn: res.loggedIn });
         setStep("approved");
+        onSessionApproved();
       }
     } catch (err) {
       setError(humanConnectError(err));
