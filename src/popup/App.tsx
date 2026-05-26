@@ -79,10 +79,21 @@ async function bootstrap() {
     await loadVaultData();
     screen.value = "main";
 
-    // Fire-and-forget: pull any events that other devices pushed while
-    // this popup was closed. If something arrives we reload the vault
-    // so the user sees the fresh data without re-opening the popup.
+    // Fire-and-forget cross-device convergence:
+    //   1. Push every local account we know about (idempotent on the
+    //      receiver — `applyOp` checks (domain, username) presence)
+    //      so anything created before sync existed, or before the
+    //      `syncAccountChange` hook ran, finally makes it server-
+    //      side.
+    //   2. Pull what other devices pushed since we last looked. If
+    //      anything new arrived, reload the vault so the user sees
+    //      it without re-opening the popup.
     void (async () => {
+      try {
+        await send({ kind: "syncPushAll" });
+      } catch {
+        /* bootstrap push best-effort */
+      }
       try {
         const r = await send({ kind: "syncPull" });
         if (r.applied !== null && r.applied > 0) {
