@@ -75,8 +75,8 @@ export function SyncScreen() {
 
   useEffect(() => {
     if (step === "auth") {
-      const t = setTimeout(() => emailRef.current?.focus(), 120);
-      return () => clearTimeout(t);
+      const handle = setTimeout(() => emailRef.current?.focus(), 120);
+      return () => clearTimeout(handle);
     }
     return undefined;
   }, [step]);
@@ -193,7 +193,7 @@ export function SyncScreen() {
       transition={SOFT_SPRING}
     >
       <Header
-        subtitle="Synchronisation"
+        subtitle={t("sync_wizard_subtitle")}
         fingerprint={fingerprint.value}
         actions={
           <motion.button
@@ -216,20 +216,17 @@ export function SyncScreen() {
       {step === "url" ? (
         <div class="card p-5 flex-col gap-3">
           <label class="flex flex-col gap-1.5">
-            <span class="text-xs text-(--color-ink-muted)">URL du serveur</span>
+            <span class="text-xs text-(--color-ink-muted)">{t("sync_wizard_url_label")}</span>
             <input
               type="url"
               class="input"
-              placeholder="https://sync.exemple.com"
+              placeholder={t("sync_wizard_url_placeholder")}
               value={baseUrl}
               onInput={(e) => setBaseUrl((e.target as HTMLInputElement).value)}
               disabled={busy}
               autoFocus
             />
           </label>
-          <p class="text-xs text-(--color-ink-muted) leading-relaxed">
-            On envoie un <code>GET /health</code> pour vérifier qu'il répond.
-          </p>
           {error !== null ? <ErrorBox message={error} /> : null}
           <div class="flex justify-end">
             <motion.button
@@ -239,7 +236,7 @@ export function SyncScreen() {
               disabled={busy || baseUrl.trim().length < 8}
               whileTap={TAP_SCALE}
             >
-              {busy ? "Test en cours…" : "Tester la connexion"}
+              {busy ? t("sync_wizard_test_busy") : t("sync_wizard_test_button")}
             </motion.button>
           </div>
         </div>
@@ -247,22 +244,13 @@ export function SyncScreen() {
 
       {step === "auth" ? (
         <div class="card p-5 flex-col gap-3">
-          <div class="callout callout-info text-xs leading-relaxed flex-col">
-            <strong>Ton mot de passe maître n'est pas redemandé</strong>
-            <span class="text-(--color-ink-muted)">
-              L'extension utilise le master de la session courante. S'il n'est pas le bon, le
-              serveur refusera la connexion à l'étape 2 et tu pourras réessayer.
-            </span>
-          </div>
           <label class="flex flex-col gap-1.5">
-            <span class="text-xs text-(--color-ink-muted)">
-              Email (ton identifiant sur ce serveur)
-            </span>
+            <span class="text-xs text-(--color-ink-muted)">{t("sync_wizard_email_label")}</span>
             <input
               ref={emailRef}
               type="email"
               class="input"
-              placeholder="tu@exemple.com"
+              placeholder={t("sync_wizard_email_placeholder")}
               autoComplete="email"
               value={email}
               onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
@@ -278,7 +266,7 @@ export function SyncScreen() {
               disabled={busy}
               whileTap={TAP_SCALE}
             >
-              Retour
+              {t("common_back")}
             </motion.button>
             <motion.button
               type="button"
@@ -287,7 +275,7 @@ export function SyncScreen() {
               disabled={busy || email.trim().length < 3}
               whileTap={TAP_SCALE}
             >
-              {busy ? "Connexion…" : "Se connecter"}
+              {busy ? t("sync_wizard_connect_busy") : t("sync_wizard_connect_button")}
             </motion.button>
           </div>
         </div>
@@ -296,10 +284,9 @@ export function SyncScreen() {
       {step === "pending" ? (
         <div class="card p-5 flex-col gap-3 items-center">
           <Spinner />
-          <strong class="text-sm text-(--color-ink)">En attente d'approbation</strong>
-          <p class="text-xs text-(--color-ink-muted) leading-relaxed text-center max-w-sm">
-            L'administrateur de <code>{baseUrl}</code> doit approuver ton compte. Cette page se
-            mettra à jour automatiquement dès qu'il aura statué.
+          <strong class="text-sm text-(--color-ink)">{t("sync_wizard_pending_title")}</strong>
+          <p class="text-xs text-(--color-ink-muted) text-center">
+            <code>{baseUrl}</code>
           </p>
           <motion.button
             type="button"
@@ -307,7 +294,7 @@ export function SyncScreen() {
             onClick={() => void cancelPending()}
             whileTap={TAP_SCALE}
           >
-            Annuler la demande
+            {t("sync_wizard_pending_cancel")}
           </motion.button>
         </div>
       ) : null}
@@ -315,7 +302,7 @@ export function SyncScreen() {
       {step === "approved" && done !== null ? (
         <div class="card p-5 flex-col gap-3">
           <div class="callout callout-success">
-            Connecté à <code>{done.baseUrl}</code> en tant que <code>{done.email}</code>.
+            {t("sync_wizard_approved_message", done.baseUrl, done.email)}
           </div>
           <div class="flex justify-end">
             <motion.button
@@ -326,7 +313,7 @@ export function SyncScreen() {
               }}
               whileTap={TAP_SCALE}
             >
-              Terminé
+              {t("sync_wizard_done")}
             </motion.button>
           </div>
         </div>
@@ -335,13 +322,13 @@ export function SyncScreen() {
       {step === "rejected" && done !== null ? (
         <div class="card p-5 flex-col gap-3">
           <div class="callout callout-danger">
-            <strong>Connexion refusée</strong>
+            <strong>{t("sync_wizard_rejected_title")}</strong>
             {done.rejectionReason !== undefined ? (
-              <p class="m-0 mt-1 text-xs">Raison : {done.rejectionReason}</p>
-            ) : (
               <p class="m-0 mt-1 text-xs">
-                L'administrateur a refusé ta demande. Contacte-le si tu penses que c'est une erreur.
+                {t("sync_wizard_rejected_reason", done.rejectionReason)}
               </p>
+            ) : (
+              <p class="m-0 mt-1 text-xs">{t("sync_wizard_rejected_default")}</p>
             )}
           </div>
           <div class="flex justify-end">
@@ -351,7 +338,7 @@ export function SyncScreen() {
               onClick={() => void cancelPending()}
               whileTap={TAP_SCALE}
             >
-              Retour
+              {t("common_back")}
             </motion.button>
           </div>
         </div>
@@ -396,31 +383,31 @@ function ErrorBox({ message }: { message: string }) {
 function humanReachReason(reason?: string): string {
   switch (reason) {
     case "invalid_url":
-      return "URL invalide. Utilise http:// ou https://.";
+      return t("sync_reach_invalid_url");
     case "timeout":
-      return "Le serveur n'a pas répondu en 5 secondes.";
+      return t("sync_reach_timeout");
     case "network_error":
-      return "Impossible de joindre l'URL. Vérifie qu'elle est accessible et que CORS est configuré pour cette extension.";
+      return t("sync_reach_network");
     case "unexpected_payload":
-      return "L'URL répond mais ne ressemble pas à un serveur Keyfount.";
+      return t("sync_reach_unexpected");
     default:
       if (reason !== undefined && reason.startsWith("http_")) {
-        return `Le serveur a répondu ${reason.slice(5)}.`;
+        return t("sync_reach_http", reason.slice(5));
       }
-      return "Erreur inconnue lors du test.";
+      return t("sync_reach_unknown");
   }
 }
 
 function humanConnectError(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err);
   if (message === "locked") {
-    return "L'extension est verrouillée. Reviens à l'écran d'accueil pour saisir ton master, puis relance.";
+    return t("sync_err_locked");
   }
   if (message === "wrong master password") {
-    return "Mot de passe maître refusé par le serveur. Vérifie que le master de l'extension est bien celui que tu utilisais à l'enregistrement.";
+    return t("sync_err_master_mismatch");
   }
   if (message.includes("too_many_attempts")) {
-    return "Trop de tentatives échouées récentes. Réessaie dans quelques minutes.";
+    return t("sync_err_too_many");
   }
-  return `Échec de la connexion : ${message}`;
+  return t("sync_err_generic", message);
 }

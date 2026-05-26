@@ -286,5 +286,73 @@
   "sync_force_error": {
     "message": "Échec : $MESSAGE$",
     "placeholders": { "message": { "content": "$1" } }
-  }
+  },
+
+  "sync_wizard_subtitle": { "message": "Synchronisation" },
+  "sync_wizard_url_label": { "message": "URL du serveur" },
+  "sync_wizard_url_placeholder": { "message": "https://sync.exemple.com" },
+  "sync_wizard_test_busy": { "message": "Test en cours…" },
+  "sync_wizard_test_button": { "message": "Tester la connexion" },
+  "sync_wizard_email_label": { "message": "Email" },
+  "sync_wizard_email_placeholder": { "message": "tu@exemple.com" },
+  "sync_wizard_connect_busy": { "message": "Connexion…" },
+  "sync_wizard_connect_button": { "message": "Se connecter" },
+  "sync_wizard_pending_title": { "message": "En attente d'approbation" },
+  "sync_wizard_pending_cancel": { "message": "Annuler la demande" },
+  "sync_wizard_approved_message": {
+    "message": "Connecté à $URL$ en tant que $EMAIL$.",
+    "placeholders": { "url": { "content": "$1" }, "email": { "content": "$2" } }
+  },
+  "sync_wizard_done": { "message": "Terminé" },
+  "sync_wizard_rejected_title": { "message": "Connexion refusée" },
+  "sync_wizard_rejected_reason": {
+    "message": "Raison : $REASON$",
+    "placeholders": { "reason": { "content": "$1" } }
+  },
+  "sync_wizard_rejected_default": {
+    "message": "L'administrateur a refusé ta demande. Contacte-le si tu penses que c'est une erreur."
+  },
+
+  "sync_reach_invalid_url": { "message": "URL invalide. Utilise http:// ou https://." },
+  "sync_reach_timeout": { "message": "Le serveur n'a pas répondu en 5 secondes." },
+  "sync_reach_network": {
+    "message": "Impossible de joindre l'URL. Vérifie qu'elle est accessible et que CORS est configuré pour cette extension."
+  },
+  "sync_reach_unexpected": {
+    "message": "L'URL répond mais ne ressemble pas à un serveur Keyfount."
+  },
+  "sync_reach_http": {
+    "message": "Le serveur a répondu $CODE$.",
+    "placeholders": { "code": { "content": "$1" } }
+  },
+  "sync_reach_unknown": { "message": "Erreur inconnue lors du test." },
+
+  "sync_err_locked": {
+    "message": "L'extension est verrouillée. Reviens à l'écran d'accueil pour saisir ton master, puis relance."
+  },
+  "sync_err_master_mismatch": {
+    "message": "Mot de passe maître refusé par le serveur. Vérifie que le master de l'extension est bien celui que tu utilisais à l'enregistrement."
+  },
+  "sync_err_too_many": {
+    "message": "Trop de tentatives échouées récentes. Réessaie dans quelques minutes."
+  },
+  "sync_err_generic": {
+    "message": "Échec de la connexion : $MESSAGE$",
+    "placeholders": { "message": { "content": "$1" } }
+  },
+
+  "sync_section_title": { "message": "Synchronisation" },
+  "sync_section_loading": { "message": "Chargement…" },
+  "sync_section_account": { "message": "Compte serveur" },
+  "sync_section_server_label": { "message": "Serveur" },
+  "sync_section_email_label": { "message": "Identifiant" },
+  "sync_section_disconnect_confirm": { "message": "Déconnecter cet appareil ?" },
+  "sync_section_disconnect_button": { "message": "Déconnecter" },
+  "sync_section_view_status": { "message": "Voir le statut" },
+  "sync_section_disconnect_action": { "message": "Déconnecter cet appareil" },
+  "sync_section_no_server": { "message": "Pas encore de serveur connecté." },
+  "sync_section_connect": { "message": "Connecter un serveur" },
+
+  "sync_status_connected": { "message": "Connecté" },
+  "sync_status_pending": { "message": "En attente" }
 }
