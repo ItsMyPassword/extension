@@ -30,7 +30,7 @@ test.describe("multi-profile (vaults)", () => {
     await expect(rows.first()).toHaveClass(/account-row--active/);
   });
 
-  test("Ajouter un profil routes to setup and creates an isolated second vault", async ({
+  test("Ajouter un coffre routes to setup and creates an isolated second vault", async ({
     context,
     extensionId,
   }) => {
@@ -41,8 +41,8 @@ test.describe("multi-profile (vaults)", () => {
 
     // Open the vaults screen.
     await page.locator(VAULT_AVATAR).click();
-    // Tap "Ajouter un profil".
-    await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
+    // Tap "Ajouter un coffre".
+    await page.locator("button.btn", { hasText: "Ajouter un coffre" }).click();
 
     // The setup screen now expects a *different* master for the new vault.
     await completeSetup(page, "second-vault-master-pass-different");
@@ -66,7 +66,7 @@ test.describe("multi-profile (vaults)", () => {
 
     // Create a second vault.
     await page.locator(VAULT_AVATAR).click();
-    await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
+    await page.locator("button.btn", { hasText: "Ajouter un coffre" }).click();
     await completeSetup(page, "second-vault-master-pass-different");
 
     // Switch back to the first vault via the vaults screen.
@@ -101,7 +101,7 @@ test.describe("multi-profile (vaults)", () => {
 
     // Create + switch to a second vault, leaving us on its main screen.
     await page.locator(VAULT_AVATAR).click();
-    await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
+    await page.locator("button.btn", { hasText: "Ajouter un coffre" }).click();
     await completeSetup(page, "second-vault-master-pass-different");
 
     // Switch to the first vault → lands on its unlock screen.
@@ -130,11 +130,11 @@ test.describe("multi-profile (vaults)", () => {
 
     // Start adding a new vault but change our mind on the setup screen.
     await page.locator(VAULT_AVATAR).click();
-    await page.locator("button.btn", { hasText: "Ajouter un profil" }).click();
+    await page.locator("button.btn", { hasText: "Ajouter un coffre" }).click();
     await expect(
-      page.locator("button", { hasText: "Annuler — utiliser un profil existant" }),
+      page.locator("button", { hasText: "Annuler — utiliser un coffre existant" }),
     ).toBeVisible({ timeout: 10_000 });
-    await page.locator("button", { hasText: "Annuler — utiliser un profil existant" }).click();
+    await page.locator("button", { hasText: "Annuler — utiliser un coffre existant" }).click();
 
     // We should land on the first vault's unlock screen (one password input).
     await expect(page.locator('input[type="password"]').first()).toBeVisible({ timeout: 10_000 });

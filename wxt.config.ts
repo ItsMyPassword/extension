@@ -39,6 +39,12 @@ export default defineConfig({
   },
 
   vite: () => ({
+    // `__E2E__` lets the badge open its shadow root for Playwright when built
+    // with KEYFOUNT_E2E=1 (npm run build:e2e). Defaults to false → production
+    // keeps the closed shadow. See src/content/Badge.tsx.
+    define: {
+      __E2E__: JSON.stringify(process.env.KEYFOUNT_E2E === "1"),
+    },
     plugins: [tailwindcss()],
     resolve: {
       alias: {

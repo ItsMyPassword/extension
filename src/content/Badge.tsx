@@ -29,6 +29,14 @@ const HOST_TAG = "keyfount-badge";
 const BANNER_TAG = "keyfount-save-banner";
 const ROTATE_TAG = "keyfount-rotate-banner";
 
+// The badge UI lives in a *closed* shadow root so the host page can't reach
+// into it (it could otherwise read a generated password from our DOM). e2e
+// builds (`KEYFOUNT_E2E=1`, see wxt.config.ts) flip this to "open" so
+// Playwright can drive the panel; production stays closed. The badge's
+// behaviour is identical either way — only DOM isolation differs.
+declare const __E2E__: boolean;
+const SHADOW_MODE: ShadowRootMode = __E2E__ ? "open" : "closed";
+
 /**
  * Write a value to an input using the prototype setter so React/Vue/etc
  * controlled components see it, then fire input + change events.
@@ -61,7 +69,7 @@ export async function showSaveBanner({
   const host = document.createElement(BANNER_TAG);
   host.style.cssText =
     "position: fixed; top: 16px; right: 16px; z-index: 2147483647; pointer-events: none;";
-  const shadow = host.attachShadow({ mode: "closed" });
+  const shadow = host.attachShadow({ mode: SHADOW_MODE });
   const styleEl = document.createElement("style");
   styleEl.textContent = `${atomStyles}\n${badgeStyles}`;
   shadow.appendChild(styleEl);
@@ -171,7 +179,7 @@ export async function showRotateBanner({ entry }: { entry: AccountEntry }): Prom
   const host = document.createElement(ROTATE_TAG);
   host.style.cssText =
     "position: fixed; top: 16px; right: 16px; z-index: 2147483647; pointer-events: none;";
-  const shadow = host.attachShadow({ mode: "closed" });
+  const shadow = host.attachShadow({ mode: SHADOW_MODE });
   const styleEl = document.createElement("style");
   styleEl.textContent = `${atomStyles}\n${badgeStyles}`;
   shadow.appendChild(styleEl);
@@ -287,12 +295,16 @@ export function attachBadge(options: AttachOptions): BadgeController {
   const host = document.createElement(HOST_TAG);
   host.style.cssText =
     "position: absolute; z-index: 2147483647; width: 0; height: 0; pointer-events: none; margin: 0; padding: 0;";
-  const shadow = host.attachShadow({ mode: "closed" });
+  const shadow = host.attachShadow({ mode: SHADOW_MODE });
   const styleEl = document.createElement("style");
   styleEl.textContent = `${atomStyles}\n${badgeStyles}`;
   shadow.appendChild(styleEl);
   const mount = document.createElement("div");
   shadow.appendChild(mount);
+  // Reflect the panel's open/closed state onto the host (regular DOM, no
+  // secret leaked) so it's observable for styling and e2e — the panel itself
+  // is inside the shadow root.
+  host.dataset.open = "false";
   document.documentElement.appendChild(host);
 
   let openRef: (() => void) | null = null;
@@ -342,6 +354,9 @@ export function attachBadge(options: AttachOptions): BadgeController {
       registerOpen={setOpen}
       registerClose={setClose}
       registerUpdate={setUpdate}
+      onOpenChange={(isOpen) => {
+        host.dataset.open = isOpen ? "true" : "false";
+      }}
     />,
     mount,
   );
@@ -378,6 +393,7 @@ interface BadgeProps {
   registerOpen: (fn: () => void) => void;
   registerClose: (fn: () => void) => void;
   registerUpdate: (fn: () => void) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 type Status =
@@ -397,6 +413,7 @@ function Badge({
   registerOpen,
   registerClose,
   registerUpdate,
+  onOpenChange,
 }: BadgeProps) {
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -417,6 +434,11 @@ function Badge({
       /* no-op */
     });
   }, [registerOpen, registerClose, registerUpdate]);
+
+  // Mirror the open state to the host element (see attachBadge).
+  useEffect(() => {
+    onOpenChange(open);
+  }, [open, onOpenChange]);
 
   // Close the panel if the user clicks outside.
   useEffect(() => {
