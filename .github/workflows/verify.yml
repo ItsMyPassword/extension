@@ -1,0 +1,143 @@
+name: Verify
+
+# Reusable verification suite — the single source of truth for "is this green?".
+# Called by ci.yml on every pull request, and by release.yml before publishing
+# so a release can never ship unless lint, typecheck, tests, the production
+# build (Chrome + Firefox) and e2e all pass.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to check out (defaults to the triggering commit).
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint, typecheck and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test:coverage
+
+      - name: Upload coverage artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 14
+
+  build:
+    name: Build installable extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+    strategy:
+      matrix:
+        target: [chrome, firefox]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (${{ matrix.target }})
+        run: |
+          if [ "${{ matrix.target }}" = "firefox" ]; then
+            npm run build:firefox
+          else
+            npm run build
+          fi
+
+      - name: Package zip (${{ matrix.target }})
+        run: |
+          if [ "${{ matrix.target }}" = "firefox" ]; then
+            npm run zip:firefox
+          else
+            npm run zip
+          fi
+
+      - name: Upload extension artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: keyfount-${{ matrix.target }}-${{ github.sha }}
+          path: .output/*.zip
+          retention-days: 14
+          if-no-files-found: error
+          include-hidden-files: true
+
+  e2e:
+    name: End-to-end (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Build Chrome extension (e2e)
+        run: npm run build:e2e
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.sha }}
+          path: playwright-report/
+          retention-days: 7
+          include-hidden-files: true

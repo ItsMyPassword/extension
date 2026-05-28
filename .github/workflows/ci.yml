@@ -2,7 +2,8 @@ name: CI
 
 # Gates every pull request into develop and main, plus direct pushes to
 # develop. Feature branches merge into develop; develop merges into main to
-# cut a release (release.yml).
+# cut a release (release.yml). The actual checks live in verify.yml, which the
+# release workflow reuses so the same green bar gates both CI and releases.
 on:
   pull_request:
     branches: [develop, main]
@@ -10,137 +11,10 @@ on:
     branches: [develop]
   workflow_dispatch:
 
-# Cancel superseded runs on the same ref to save minutes.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 jobs:
   verify:
-    name: Lint, typecheck and test
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Format check
-        run: npm run format:check
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm run test:coverage
-
-      - name: Upload coverage artefact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage/
-          retention-days: 14
-
-  build:
-    name: Build installable extension
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: verify
-
-    strategy:
-      matrix:
-        target: [chrome, firefox]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build (${{ matrix.target }})
-        run: |
-          if [ "${{ matrix.target }}" = "firefox" ]; then
-            npm run build:firefox
-          else
-            npm run build
-          fi
-
-      - name: Package zip (${{ matrix.target }})
-        run: |
-          if [ "${{ matrix.target }}" = "firefox" ]; then
-            npm run zip:firefox
-          else
-            npm run zip
-          fi
-
-      - name: Upload extension artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: keyfount-${{ matrix.target }}-${{ github.sha }}
-          path: .output/*.zip
-          retention-days: 14
-          if-no-files-found: error
-          include-hidden-files: true
-
-  e2e:
-    name: End-to-end (Chromium)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: verify
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install chromium --with-deps
-
-      # Build with the e2e flag (open shadow root) so the badge specs can
-      # drive the panel; production keeps the closed shadow. Behaviour is
-      # identical — only DOM isolation differs.
-      - name: Build Chrome extension (e2e)
-        run: npm run build:e2e
-
-      - name: Run Playwright tests
-        run: npm run test:e2e
-
-      - name: Upload Playwright report on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ github.sha }}
-          path: playwright-report/
-          retention-days: 7
-          include-hidden-files: true
+    uses: ./.github/workflows/verify.yml
