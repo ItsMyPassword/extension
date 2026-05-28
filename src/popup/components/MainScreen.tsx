@@ -27,6 +27,7 @@ import {
   errorMessage,
   fingerprint,
   generated,
+  hasPin,
   historyEnabled,
   screen,
 } from "../state.js";
@@ -149,6 +150,16 @@ export function MainScreen() {
   const onLock = useCallback(async () => {
     await send({ kind: "lock" });
     generated.value = null;
+    // Refresh hasPin so the unlock screen offers the PIN tab. The global
+    // signal is only primed at bootstrap, so a PIN enabled later this
+    // session would otherwise be missed here (mirrors VaultsScreen's
+    // switch path).
+    try {
+      const status = await send({ kind: "status" });
+      hasPin.value = status.hasPin;
+    } catch {
+      /* keep the last-known hasPin */
+    }
     screen.value = "unlock";
   }, []);
 
