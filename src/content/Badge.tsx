@@ -7,7 +7,7 @@
  */
 import { render } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { registrableDomain } from "../shared/domain.js";
+import { fullHost, registrableDomain } from "../shared/domain.js";
 import { ProfileEditor } from "../shared/ProfileEditor.js";
 import { Logo } from "../shared/Logo.js";
 import {
@@ -423,6 +423,11 @@ function Badge({
   const [emailOverride, setEmailOverride] = useState("");
   const [historyEnabled, setHistoryEnabled] = useState(false);
   const [saved, setSaved] = useState<AccountEntry[]>([]);
+  // When the page is a subdomain, a new account is saved against the
+  // registrable domain by default (broad). The user can opt into a
+  // full-host save — which also changes the derivation salt, so it must be
+  // chosen before the password is generated.
+  const [useFullHost, setUseFullHost] = useState(false);
 
   useEffect(() => {
     registerOpen(() => setOpen(true));
@@ -460,7 +465,7 @@ function Badge({
   }, [open]);
 
   const refresh = useCallback(
-    async (override?: { profile?: Profile; email?: string }) => {
+    async (override?: { profile?: Profile; email?: string; useFullHost?: boolean }) => {
       setStatus({ kind: "loading" });
       setCopied(false);
       try {
@@ -484,7 +489,7 @@ function Badge({
           const ext = await send({ kind: "getState" });
           setHistoryEnabled(ext.historyEnabled);
           if (ext.historyEnabled) {
-            const list = await send({ kind: "listAccounts", domain });
+            const list = await send({ kind: "listAccounts", url: window.location.href });
             savedForDomain = list.entries;
             setSaved(list.entries);
           } else {
@@ -529,14 +534,28 @@ function Badge({
           setProfile(p.profile);
         }
 
+        // The derivation salt is the account's *canonical* domain. A matched
+        // account (subdomain/full-host/linked) carries its own salt, so the
+        // linked z.y.com row still yields w.y.com's password. A brand-new
+        // account derives from the registrable domain by default, or from the
+        // full host when the user opted in on a subdomain.
+        const host = fullHost(window.location.href);
+        const canNarrow = host !== null && host !== domain;
+        const wantFullHost = override?.useFullHost ?? useFullHost;
+        const saltDomain = matching
+          ? matching.domain
+          : wantFullHost && canNarrow && host !== null
+            ? host
+            : domain;
+
         const effective = override?.profile ?? matchingProfile ?? profile;
         const response = await send({
           kind: "generate",
-          domain,
+          domain: saltDomain,
           email,
           ...(effective !== null ? { profile: effective } : {}),
         });
-        setStatus({ kind: "ready", password: response.password, domain });
+        setStatus({ kind: "ready", password: response.password, domain: saltDomain });
       } catch (error) {
         setStatus({
           kind: "error",
@@ -544,7 +563,7 @@ function Badge({
         });
       }
     },
-    [password, profile, emailOverride],
+    [password, profile, emailOverride, useFullHost],
   );
 
   const fill = useCallback(() => {
@@ -656,6 +675,14 @@ function Badge({
     [refresh],
   );
 
+  // Subdomain save-granularity affordance: only meaningful for a brand-new
+  // account on a page whose host differs from its registrable root.
+  const pageHost = fullHost(window.location.href);
+  const pageRegistrable = registrableDomain(window.location.href);
+  const canNarrow = pageHost !== null && pageRegistrable !== null && pageHost !== pageRegistrable;
+  const currentEmail = emailOverride.trim() || readUsername(password);
+  const isNewAccount = currentEmail.length > 0 && !saved.some((e) => e.username === currentEmail);
+
   return (
     <div class="badge">
       <button
@@ -720,6 +747,25 @@ function Badge({
                 ))}
               </ul>
             </div>
+          ) : null}
+
+          {status.kind === "ready" && historyEnabled && canNarrow && isNewAccount ? (
+            <label class="badge__scope">
+              <input
+                type="checkbox"
+                checked={useFullHost}
+                onChange={(e) => {
+                  const next = (e.target as HTMLInputElement).checked;
+                  setUseFullHost(next);
+                  void refresh({ useFullHost: next });
+                }}
+              />
+              <span class="badge__scope-label">
+                {useFullHost
+                  ? t("save_scope_full_host", pageHost ?? "")
+                  : t("save_scope_registrable", pageRegistrable ?? "")}
+              </span>
+            </label>
           ) : null}
 
           {renderBody({
