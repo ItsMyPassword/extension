@@ -242,6 +242,15 @@
   "rotate_cta": { "message": "Rotate" },
   "rotate_dismiss": { "message": "Not now" },
 
+  "detail_linked_section": { "message": "Linked domains" },
+  "detail_linked_hint": {
+    "message": "Also offer this account on other sites. A registrable domain (example.com) matches every subdomain; a full host (app.example.com) matches that host only. The password never changes — it still derives from this account's primary domain."
+  },
+  "detail_linked_empty": { "message": "No linked domains yet." },
+  "detail_linked_placeholder": { "message": "app.other-site.com" },
+  "detail_linked_add": { "message": "Link" },
+  "detail_linked_remove": { "message": "Remove" },
+  "detail_link_failed": { "message": "Could not link that domain." },
   "detail_rotate_section": { "message": "Rotate the password" },
   "detail_rotate_hint": {
     "message": "Bumps the counter and recomputes a fresh password for this account. Use this when a site forces a change or you suspect a leak."

@@ -34,6 +34,8 @@ export function AccountDetailScreen() {
   const [previewCopied, setPreviewCopied] = useState(false);
   const [postRenameToast, setPostRenameToast] = useState<string | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState<SyncStamp | null>(null);
+  const [linkDraft, setLinkDraft] = useState("");
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   // Fetch sync info whenever the entry changes (rename keeps the old key
   // entry's timestamp; we refresh after a sync-ack via the cursor below).
@@ -222,6 +224,47 @@ export function AccountDetailScreen() {
       /* swallowed */
     } finally {
       setBusy(false);
+    }
+  };
+
+  const addLink = async (event: Event) => {
+    event.preventDefault();
+    const linked = linkDraft.trim().toLowerCase();
+    if (linked.length === 0) return;
+    setLinkError(null);
+    try {
+      const res = await send({
+        kind: "linkAccountDomain",
+        domain: entry.domain,
+        username: entry.username,
+        linked,
+      });
+      const updated = res.entry;
+      allAccounts.value = allAccounts.value.map((e) =>
+        e.domain === entry.domain && e.username === entry.username ? updated : e,
+      );
+      selectedAccount.value = updated;
+      setLinkDraft("");
+    } catch (error) {
+      setLinkError(error instanceof BackgroundError ? error.message : t("detail_link_failed"));
+    }
+  };
+
+  const removeLink = async (linked: string) => {
+    try {
+      const res = await send({
+        kind: "unlinkAccountDomain",
+        domain: entry.domain,
+        username: entry.username,
+        linked,
+      });
+      const updated = res.entry;
+      allAccounts.value = allAccounts.value.map((e) =>
+        e.domain === entry.domain && e.username === entry.username ? updated : e,
+      );
+      selectedAccount.value = updated;
+    } catch {
+      /* swallowed — the row stays as-is */
     }
   };
 
@@ -552,6 +595,56 @@ export function AccountDetailScreen() {
           <ProfileEditor profile={entry.profile} onChange={updateProfile} />
         </div>
       </motion.section>
+
+      <div class="flex flex-col gap-2 pt-1">
+        <h2 class="m-0 text-sm font-semibold tracking-[-0.01em]">{t("detail_linked_section")}</h2>
+        <span class="text-xs text-(--color-ink-muted) leading-snug">{t("detail_linked_hint")}</span>
+        {entry.linkedDomains !== undefined && entry.linkedDomains.length > 0 ? (
+          <ul class="flex flex-col gap-1">
+            {entry.linkedDomains.map((linked) => (
+              <li
+                key={linked}
+                class="flex items-center justify-between gap-2 rounded-xl bg-(--color-surface-sunken) border border-(--color-line) px-3 py-2"
+              >
+                <span class="font-mono text-xs truncate text-(--color-ink)">{linked}</span>
+                <motion.button
+                  type="button"
+                  class="btn btn-quiet btn-sm"
+                  whileTap={TAP_SCALE}
+                  onClick={() => void removeLink(linked)}
+                >
+                  {t("detail_linked_remove")}
+                </motion.button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span class="text-xs text-(--color-ink-muted)">{t("detail_linked_empty")}</span>
+        )}
+        <form class="flex gap-2" onSubmit={addLink}>
+          <input
+            class="input flex-1"
+            type="text"
+            inputMode="url"
+            placeholder={t("detail_linked_placeholder")}
+            value={linkDraft}
+            onInput={(e) => setLinkDraft((e.target as HTMLInputElement).value)}
+          />
+          <motion.button
+            type="submit"
+            class="btn btn-sm"
+            whileTap={TAP_SCALE}
+            disabled={linkDraft.trim().length === 0}
+          >
+            {t("detail_linked_add")}
+          </motion.button>
+        </form>
+        {linkError !== null ? (
+          <div class="field-error" role="alert">
+            {linkError}
+          </div>
+        ) : null}
+      </div>
 
       <div class="flex flex-col gap-2 pt-1">
         <h2 class="m-0 text-sm font-semibold tracking-[-0.01em]">{t("detail_rotate_section")}</h2>

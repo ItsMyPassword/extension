@@ -242,6 +242,15 @@
   "rotate_cta": { "message": "Renouveler" },
   "rotate_dismiss": { "message": "Plus tard" },
 
+  "detail_linked_section": { "message": "Domaines liés" },
+  "detail_linked_hint": {
+    "message": "Proposer aussi ce compte sur d'autres sites. Un domaine enregistrable (example.com) couvre tous les sous-domaines ; un hôte complet (app.example.com) ne couvre que cet hôte. Le mot de passe ne change pas — il dérive toujours du domaine principal de ce compte."
+  },
+  "detail_linked_empty": { "message": "Aucun domaine lié pour l'instant." },
+  "detail_linked_placeholder": { "message": "app.autre-site.com" },
+  "detail_linked_add": { "message": "Lier" },
+  "detail_linked_remove": { "message": "Retirer" },
+  "detail_link_failed": { "message": "Impossible de lier ce domaine." },
   "detail_rotate_section": { "message": "Renouveler le mot de passe" },
   "detail_rotate_hint": {
     "message": "Incrémente le compteur et recalcule un nouveau mot de passe pour ce compte. Utile quand un site impose un changement ou en cas de fuite."
