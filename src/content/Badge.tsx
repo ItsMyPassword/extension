@@ -750,22 +750,35 @@ function Badge({
           ) : null}
 
           {status.kind === "ready" && historyEnabled && canNarrow && isNewAccount ? (
-            <label class="badge__scope">
-              <input
-                type="checkbox"
-                checked={useFullHost}
-                onChange={(e) => {
-                  const next = (e.target as HTMLInputElement).checked;
-                  setUseFullHost(next);
-                  void refresh({ useFullHost: next });
+            <div class="badge__scope" role="radiogroup" aria-label={t("save_scope_title")}>
+              <span class="badge__scope-title">{t("save_scope_title")}</span>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!useFullHost}
+                class={`badge__scope-opt${!useFullHost ? " is-selected" : ""}`}
+                onClick={() => {
+                  setUseFullHost(false);
+                  void refresh({ useFullHost: false });
                 }}
-              />
-              <span class="badge__scope-label">
-                {useFullHost
-                  ? t("save_scope_full_host", pageHost ?? "")
-                  : t("save_scope_registrable", pageRegistrable ?? "")}
-              </span>
-            </label>
+              >
+                <span class="badge__scope-domain">{pageRegistrable}</span>
+                <span class="badge__scope-hint">{t("save_scope_registrable_hint")}</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={useFullHost}
+                class={`badge__scope-opt${useFullHost ? " is-selected" : ""}`}
+                onClick={() => {
+                  setUseFullHost(true);
+                  void refresh({ useFullHost: true });
+                }}
+              >
+                <span class="badge__scope-domain">{pageHost}</span>
+                <span class="badge__scope-hint">{t("save_scope_full_host_hint")}</span>
+              </button>
+            </div>
           ) : null}
 
           {renderBody({

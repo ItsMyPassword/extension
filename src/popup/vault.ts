@@ -13,13 +13,14 @@ import { send } from "./api.js";
 import {
   activeDomain,
   activeEmail,
+  activeHost,
   allAccounts,
   faviconFallbackEnabled,
   hasPin,
   historyEnabled,
   savedAccounts,
 } from "./state.js";
-import { matchAccounts, registrableDomain } from "../shared/domain.js";
+import { fullHost, matchAccounts, registrableDomain } from "../shared/domain.js";
 
 export async function loadVaultData(): Promise<void> {
   try {
@@ -36,6 +37,7 @@ export async function loadVaultData(): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const domain = tab?.url ? registrableDomain(tab.url) : null;
   activeDomain.value = domain;
+  activeHost.value = tab?.url ? fullHost(tab.url) : null;
   activeEmail.value = "";
   savedAccounts.value = [];
   allAccounts.value = [];
